@@ -25,6 +25,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
             rl.init_relax(GlobalC::ucell.nat);
         }
     }
+    mybfgs.initialize(GlobalC::ucell.nat);
 
     this->istep = 1;
     int force_step = 1; // pengfei Li 2018-05-14
@@ -77,7 +78,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
             if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax")
             {
-                if (PARAM.inp.relax_new)
+                /*if (PARAM.inp.relax_new)
                 {
                     stop = rl.relax_step(force, stress, this->etot);
                 }
@@ -90,7 +91,18 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
                                              stress,
                                              force_step,
                                              stress_step); // pengfei Li 2018-05-14
+                }*/
+                std::vector<std::vector<double>> _force(force.nr,std::vector<double>(force.nc,0));
+                for(int i = 0; i < force.nr; i++)
+                {
+                    /* code */
+                    for(int j=0;j<force.nc;j++)
+                    {
+                        _force[i][j]=force(i,j)*13.605693009/ModuleBase::BOHR_TO_A;
+                    }
                 }
+                stop=mybfgs.Step(_force);
+                
                 // print structure
                 // changelog 20240509
                 // because I move out the dependence on GlobalV from UnitCell::print_stru_file
