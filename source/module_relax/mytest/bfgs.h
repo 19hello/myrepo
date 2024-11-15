@@ -6,6 +6,7 @@
 #include<algorithm>
 #include<cmath>
 #include"module_base/lapack_connector.h"
+#include "module_cell/unitcell.h"
 
 class bfgs
 {
@@ -26,10 +27,13 @@ public:
 
     // 成员函数声明
     void initialize(int _size);
-    bool Step(std::vector<std::vector<double>> _force);
+    bool Step(std::vector<std::vector<double>> _force,UnitCell& ucell);
+    void GetPos();
     void PrepareStep();
     void Update(std::vector<double> pos, std::vector<double> force);
     void DetermineStep();
+    void UpdatePos();
+    bool IsRestrain();
 
     // 矩阵方法声明
     std::vector<double> ReshapeMToV(std::vector<std::vector<double>> matrix);

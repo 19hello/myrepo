@@ -95,13 +95,15 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
                 std::vector<std::vector<double>> _force(force.nr,std::vector<double>(force.nc,0));
                 for(int i = 0; i < force.nr; i++)
                 {
-                    /* code */
+
                     for(int j=0;j<force.nc;j++)
                     {
                         _force[i][j]=force(i,j)*13.605693009/ModuleBase::BOHR_TO_A;
+                        std::cout<<_force[i][j]<<' ';
                     }
+                    std::cout<<std::endl;
                 }
-                stop=mybfgs.Step(_force);
+                stop=mybfgs.Step(_force,GlobalC::ucell);
                 
                 // print structure
                 // changelog 20240509

@@ -1,6 +1,7 @@
 remove_definitions(-D__MPI)
 remove_definitions(-D__LCAO)
 
+
 AddTest(
   TARGET lattice_change_methods_test
   LIBS parameter ${math_libs} base device 

@@ -17,6 +17,7 @@ add_library(
     relax_old/lattice_change_basic.cpp
     relax_old/lattice_change_cg.cpp
     relax_old/lattice_change_methods.cpp
+    mytest/bfgs.cpp
 )
 
 if(ENABLE_COVERAGE)
@@ -27,5 +28,6 @@ if(BUILD_TESTING)
   if(ENABLE_MPI)
     add_subdirectory(relax_new/test)
     add_subdirectory(relax_old/test)
-  endif() 
+  endif()
+   
 endif()
