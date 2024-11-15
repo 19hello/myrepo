@@ -2,6 +2,7 @@ INPUT_PARAMETERS
 # Created by Atomic Simulation Enviroment
 suffix                                  abacus
 calculation                             relax
+relax_method                            bfgs_trad
 relax_nmax                              50
 nspin                                   2
 nupdown                                 2

@@ -17,7 +17,7 @@ add_library(
     relax_old/lattice_change_basic.cpp
     relax_old/lattice_change_cg.cpp
     relax_old/lattice_change_methods.cpp
-    mytest/bfgs.cpp
+    bfgs_traditional/bfgs.cpp
 )
 
 if(ENABLE_COVERAGE)

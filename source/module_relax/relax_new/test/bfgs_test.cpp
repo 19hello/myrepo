@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../mytest/bfgs.h"
+#include "../../bfgs_traditional/bfgs.h"
 #include "module_hamilt_pw/hamilt_pwdft/global.h"
 #include "module_base/matrix3.h"
 #include "module_base/vector3.h"

@@ -5,7 +5,7 @@
 #include "module_esolver/esolver_ks.h"
 #include "relax_new/relax.h"
 #include "relax_old/relax_old.h"
-#include "mytest/bfgs.h"
+#include "bfgs_traditional/bfgs.h"
 class Relax_Driver
 {
 
