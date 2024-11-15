@@ -13,6 +13,7 @@
 #include "module_base/lapack_connector.h"
 #include "module_base/scalapack_connector.h"
 #include "module_elecstate/module_charge/symmetry_rho.h"
+#include "module_elecstate/module_dm/cal_edm_tddft.h"
 #include "module_elecstate/occupy.h"
 #include "module_hamilt_lcao/hamilt_lcaodft/LCAO_domain.h" // need divide_HS_in_frag
 #include "module_hamilt_lcao/module_tddft/evolve_elec.h"
@@ -165,8 +166,9 @@ void ESolver_KS_LCAO_TDDFT::hamilt2density_single(const int istep, const int ite
         this->pelec->f_en.demet = 0.0;
         if (this->psi != nullptr)
         {
+            bool skip_charge = PARAM.inp.calculation == "nscf" ? true : false;
             hsolver::HSolverLCAO<std::complex<double>> hsolver_lcao_obj(&this->pv, PARAM.inp.ks_solver);
-            hsolver_lcao_obj.solve(this->p_hamilt, this->psi[0], this->pelec_td, false);
+            hsolver_lcao_obj.solve(this->p_hamilt, this->psi[0], this->pelec_td, skip_charge);
         }
     }
 
@@ -357,7 +359,7 @@ void ESolver_KS_LCAO_TDDFT::update_pot(const int istep, const int iter)
         // calculate energy density matrix for tddft
         if (istep >= (wf.init_wfc == "file" ? 0 : 2) && module_tddft::Evolve_elec::td_edm == 0)
         {
-            this->cal_edm_tddft();
+            elecstate::cal_edm_tddft(this->pv, this->pelec, this->kv, this->p_hamilt);
         }
     }
 

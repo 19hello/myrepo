@@ -169,12 +169,15 @@ void ESolver_SDFT_PW<T, Device>::after_scf(const int istep)
 template <typename T, typename Device>
 void ESolver_SDFT_PW<T, Device>::hamilt2density_single(int istep, int iter, double ethr)
 {
+    ModuleBase::TITLE("ESolver_SDFT_PW", "hamilt2density");
+    ModuleBase::timer::tick("ESolver_SDFT_PW", "hamilt2density");
+
     // reset energy
     this->pelec->f_en.eband = 0.0;
     this->pelec->f_en.demet = 0.0;
     // choose if psi should be diag in subspace
     // be careful that istep start from 0 and iter start from 1
-    if (istep == 0 && iter == 1)
+    if (istep == 0 && iter == 1 || PARAM.inp.calculation == "nscf")
     {
         hsolver::DiagoIterAssist<T, Device>::need_subspace = false;
     }
@@ -183,8 +186,8 @@ void ESolver_SDFT_PW<T, Device>::hamilt2density_single(int istep, int iter, doub
         hsolver::DiagoIterAssist<T, Device>::need_subspace = true;
     }
 
+    bool skip_charge = PARAM.inp.calculation == "nscf" ? true : false;
     hsolver::DiagoIterAssist<T, Device>::PW_DIAG_THR = ethr;
-
     hsolver::DiagoIterAssist<T, Device>::PW_DIAG_NMAX = PARAM.inp.pw_diag_nmax;
 
     // hsolver only exists in this function
@@ -206,7 +209,15 @@ void ESolver_SDFT_PW<T, Device>::hamilt2density_single(int istep, int iter, doub
                                                            hsolver::DiagoIterAssist<T, Device>::need_subspace,
                                                            this->init_psi);
 
-    hsolver_pw_sdft_obj.solve(this->p_hamilt, this->kspw_psi[0], this->psi[0], this->pelec, this->pw_wfc, this->stowf, istep, iter, false);
+    hsolver_pw_sdft_obj.solve(this->p_hamilt,
+                              this->kspw_psi[0],
+                              this->psi[0],
+                              this->pelec,
+                              this->pw_wfc,
+                              this->stowf,
+                              istep,
+                              iter,
+                              skip_charge);
     this->init_psi = true;
 
     // set_diagethr need it
@@ -233,6 +244,7 @@ void ESolver_SDFT_PW<T, Device>::hamilt2density_single(int istep, int iter, doub
 #ifdef __MPI
     MPI_Bcast(&(this->pelec->f_en.deband), 1, MPI_DOUBLE, 0, PARAPW_WORLD);
 #endif
+    ModuleBase::timer::tick("ESolver_SDFT_PW", "hamilt2density");
 }
 
 template <typename T, typename Device>
@@ -241,10 +253,10 @@ double ESolver_SDFT_PW<T, Device>::cal_energy()
     return this->pelec->f_en.etot;
 }
 
-template <>
-void ESolver_SDFT_PW<std::complex<double>, base_device::DEVICE_CPU>::cal_force(ModuleBase::matrix& force)
+template <typename T, typename Device>
+void ESolver_SDFT_PW<T, Device>::cal_force(ModuleBase::matrix& force)
 {
-    Sto_Forces ff(GlobalC::ucell.nat);
+    Sto_Forces<double, Device> ff(GlobalC::ucell.nat);
 
     ff.cal_stoforce(force,
                     *this->pelec,
@@ -253,20 +265,16 @@ void ESolver_SDFT_PW<std::complex<double>, base_device::DEVICE_CPU>::cal_force(M
                     &this->sf,
                     &this->kv,
                     this->pw_wfc,
-                    this->psi,
+                    GlobalC::ppcell,
+                    GlobalC::ucell,
+                    *this->kspw_psi,
                     this->stowf);
 }
 
-template <>
-void ESolver_SDFT_PW<std::complex<double>, base_device::DEVICE_GPU>::cal_force(ModuleBase::matrix& force)
+template <typename T, typename Device>
+void ESolver_SDFT_PW<T, Device>::cal_stress(ModuleBase::matrix& stress)
 {
-    ModuleBase::WARNING_QUIT("ESolver_SDFT_PW<T, Device>::cal_force", "DEVICE_GPU is not supported");
-}
-
-template <>
-void ESolver_SDFT_PW<std::complex<double>, base_device::DEVICE_CPU>::cal_stress(ModuleBase::matrix& stress)
-{
-    Sto_Stress_PW ss;
+    Sto_Stress_PW<double, Device> ss;
     ss.cal_stress(stress,
                   *this->pelec,
                   this->pw_rho,
@@ -274,17 +282,11 @@ void ESolver_SDFT_PW<std::complex<double>, base_device::DEVICE_CPU>::cal_stress(
                   &this->sf,
                   &this->kv,
                   this->pw_wfc,
-                  this->psi,
+                  *this->kspw_psi,
                   this->stowf,
                   this->pelec->charge,
                   &GlobalC::ppcell,
                   GlobalC::ucell);
-}
-
-template <>
-void ESolver_SDFT_PW<std::complex<double>, base_device::DEVICE_GPU>::cal_stress(ModuleBase::matrix& stress)
-{
-    ModuleBase::WARNING_QUIT("ESolver_SDFT_PW<T, Device>::cal_stress", "DEVICE_GPU is not supported");
 }
 
 template <typename T, typename Device>
@@ -353,39 +355,8 @@ void ESolver_SDFT_PW<T, Device>::others(const int istep)
 {
     ModuleBase::TITLE("ESolver_SDFT_PW", "others");
 
-    if (PARAM.inp.calculation == "nscf")
-    {
-        this->nscf();
-    }
-    else
-    {
-        ModuleBase::WARNING_QUIT("ESolver_SDFT_PW<T, Device>::others", "CALCULATION type not supported");
-    }
+    ModuleBase::WARNING_QUIT("ESolver_SDFT_PW<T, Device>::others", "CALCULATION type not supported");
 
-    return;
-}
-
-template <typename T, typename Device>
-void ESolver_SDFT_PW<T, Device>::nscf()
-{
-    ModuleBase::TITLE("ESolver_SDFT_PW", "nscf");
-    ModuleBase::timer::tick("ESolver_SDFT_PW", "nscf");
-
-    const int istep = 0;
-
-    const int iter = 1;
-
-    const double diag_thr = std::max(std::min(1e-5, 0.1 * PARAM.inp.scf_thr / std::max(1.0, PARAM.inp.nelec)), 1e-12);
-
-    std::cout << " DIGA_THR          : " << diag_thr << std::endl;
-
-    this->before_scf(istep);
-
-    this->hamilt2density_single(istep, iter, diag_thr);
-
-    this->pelec->cal_energies(2);
-
-    ModuleBase::timer::tick("ESolver_SDFT_PW", "nscf");
     return;
 }
 
