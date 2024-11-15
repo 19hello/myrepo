@@ -13,7 +13,6 @@ void bfgs::initialize(int _size) // initialize H0、H、pos0、force0、force
     for (int i = 0; i < 3*size; ++i) {
         H[i][i] = alpha;  
     }
-
     pos = std::vector<std::vector<double>> (size, std::vector<double>(3, 0.0)); 
     pos0 = std::vector<double>(3*size, 0.0);
     dpos = std::vector<std::vector<double>>(size, std::vector<double>(3, 0.0));
@@ -29,10 +28,13 @@ bool bfgs::Step(std::vector<std::vector<double>> _force,UnitCell& ucell)
     std::cout<<"enter Step"<<std::endl;
     GlobalC::ucell.ionic_position_updated = true;
     force = _force;
-    
+    //std::cout<<"enter Step0"<<std::endl;
+    //std::cout<<size<<std::endl;
     //GetPos(ucell);
     PrepareStep();
+    //std::cout<<"enter Step1"<<std::endl;
     DetermineStep();
+    //std::cout<<"enter Step2"<<std::endl;
     /*for(int i=0;i<size;i++)
     {
         for(int j=0;j<3;j++)
@@ -42,6 +44,7 @@ bool bfgs::Step(std::vector<std::vector<double>> _force,UnitCell& ucell)
         std::cout<<std::endl;
     }*/
     UpdatePos();
+    //std::cout<<"enter Step3"<<std::endl;
     return IsRestrain();
 }
 
@@ -63,9 +66,12 @@ void bfgs::GetPos()
 
 void bfgs::PrepareStep()
 {
+    //std::cout<<"enter prepareStep0"<<std::endl;
     std::vector<double> changedforce = ReshapeMToV(force);
     std::vector<double> changedpos = ReshapeMToV(pos);
+    //std::cout<<"enter prepareStep1"<<std::endl;
     Update(changedpos, changedforce);
+    //std::cout<<"enter prepareStep2"<<std::endl;
     /*for(int i = 0; i < 3*size; i++)
     {
         for(int j = 0; j < 3*size; j++)
@@ -75,8 +81,11 @@ void bfgs::PrepareStep()
         std::cout<<std::endl;
     }*/
     //call dysev
+    //std::cout<<size<<std::endl;
     std::vector<double> omega(3*size);
+    //std::cout<<"enter prepareStep3"<<std::endl;
     std::vector<double> work(3*size*3*size);
+    //std::cout<<"enter prepareStep4"<<std::endl;
     int lwork=3*size*3*size;
     int info;
     std::vector<double> H_flat;
@@ -88,6 +97,7 @@ void bfgs::PrepareStep()
     int* ptr=&value;
     dsyev_("V","U",ptr,H_flat.data(),ptr,omega.data(),work.data(),&lwork,&info);
     std::vector<std::vector<double>> V(3*size, std::vector<double>(3*size, 0.0));
+    //std::cout<<"enter prepareStep5"<<std::endl;
     for(int i = 0; i < 3*size; i++)
     {
         for(int j = 0; j < 3*size; j++)
@@ -95,6 +105,7 @@ void bfgs::PrepareStep()
             V[j][i] = H_flat[3*size*i + j];
         }
     }
+    
 
     /*for(int i=0;i<3*size;i++)
     {

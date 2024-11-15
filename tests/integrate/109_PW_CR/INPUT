@@ -14,7 +14,7 @@ nspin 1
 basis_type		pw
 relax_nmax                   5
 relax_new                    0
-
+relax_method          bfgs_trad
 cal_stress                  1
 stress_thr              1e-6
 cal_force                   1

@@ -9,14 +9,14 @@
                               https://github.com/deepmodeling/abacus-develop         
                       Commit: unknown
 
- Thu Nov 14 10:18:10 2024
+ Fri Nov 15 08:03:09 2024
  MAKE THE DIR         : OUT.autotest/
  RUNNING WITH DEVICE  : CPU / 13th Gen Intel(R) Core(TM) i7-13700KF
  UNIFORM GRID DIM        : 36 * 36 * 36
  UNIFORM GRID DIM(BIG)   : 36 * 36 * 36
- DONE(0.0240671  SEC) : SETUP UNITCELL
- DONE(0.138078   SEC) : SYMMETRY
- DONE(0.457622   SEC) : INIT K-POINTS
+ DONE(0.0243023  SEC) : SETUP UNITCELL
+ DONE(0.134805   SEC) : SYMMETRY
+ DONE(0.405829   SEC) : INIT K-POINTS
  ---------------------------------------------------------
  Ion relaxation calculations
  ---------------------------------------------------------
@@ -30,31 +30,27 @@
  ---------------------------------------------------------
  Initial plane wave basis and FFT box
  ---------------------------------------------------------
- DONE(0.461745   SEC) : INIT PLANEWAVE
- DONE(0.468552   SEC) : LOCAL POTENTIAL
- DONE(0.513438   SEC) : NON-LOCAL POTENTIAL
+ DONE(0.409808   SEC) : INIT PLANEWAVE
+ DONE(0.416917   SEC) : LOCAL POTENTIAL
+ DONE(0.478111   SEC) : NON-LOCAL POTENTIAL
  MEMORY FOR PSI (MB)  : 0.198975
- DONE(0.513528   SEC) : INIT BASIS
+ DONE(0.478175   SEC) : INIT BASIS
  -------------------------------------------
  STEP OF ION RELAXATION : 1
  -------------------------------------------
  START CHARGE      : atomic
- DONE(0.63044    SEC) : INIT SCF
- * * * * * *
- << Start SCF iteration.
+ DONE(0.568306   SEC) : INIT SCF
  ITER       ETOT/eV          EDIFF/eV         DRHO     TIME/s
- CG1     -2.09433649e+02   0.00000000e+00   8.5284e-02   0.35
- CG2     -2.09613565e+02  -1.79916640e-01   3.4626e-02   0.23
- CG3     -2.09643627e+02  -3.00618814e-02   2.5022e-03   0.21
+ CG1     -2.09433649e+02   0.00000000e+00   8.5284e-02   0.29
+ CG2     -2.09613565e+02  -1.79916640e-01   3.4626e-02   0.21
+ CG3     -2.09643627e+02  -3.00618814e-02   2.5022e-03   0.18
  CG4     -2.09648876e+02  -5.24887761e-03   2.7937e-04   0.23
- CG5     -2.09649850e+02  -9.73805072e-04   5.8142e-05   0.23
- CG6     -2.09649922e+02  -7.26283203e-05   2.0148e-06   0.20
- CG7     -2.09649931e+02  -8.74541703e-06   2.6068e-07   0.25
- CG8     -2.09649932e+02  -8.00758341e-07   1.6288e-08   0.22
- CG9     -2.09649932e+02  -6.03854739e-08   2.2132e-09   0.24
- CG10    -2.09649932e+02  -5.20460589e-09   1.3470e-10   0.20
- >> Leave SCF iteration.
- * * * * * *
+ CG5     -2.09649850e+02  -9.73805072e-04   5.8142e-05   0.22
+ CG6     -2.09649922e+02  -7.26283203e-05   2.0148e-06   0.15
+ CG7     -2.09649931e+02  -8.74541703e-06   2.6068e-07   0.21
+ CG8     -2.09649932e+02  -8.00758341e-07   1.6288e-08   0.17
+ CG9     -2.09649932e+02  -6.03854739e-08   2.2132e-09   0.19
+ CG10    -2.09649932e+02  -5.20460589e-09   1.3470e-10   0.16
 ----------------------------------------------------------------
  TOTAL-STRESS (KBAR)                                            
 ----------------------------------------------------------------
@@ -67,34 +63,25 @@
 3.881673 -2.401667 3.497016 
 -3.881673 2.401667 -3.497016 
 enter Step
-70.000000 0.000000 0.000000 0.000000 0.000000 0.000000 
-0.000000 70.000000 0.000000 0.000000 0.000000 0.000000 
-0.000000 0.000000 70.000000 0.000000 0.000000 0.000000 
-0.000000 0.000000 0.000000 70.000000 0.000000 0.000000 
-0.000000 0.000000 0.000000 0.000000 70.000000 0.000000 
-0.000000 0.000000 0.000000 0.000000 0.000000 70.000000 
-70.000000 70.000000 70.000000 70.000000 70.000000 70.000000 
-0.055452 -0.034310 0.049957 
--0.055452 0.034310 -0.049957 
+enter prepareStep3
+enter prepareStep4
+enter prepareStep4
+enter Step3
 0.055452
  -------------------------------------------
  STEP OF ION RELAXATION : 2
  -------------------------------------------
- DONE(3.273238   SEC) : INIT SCF
- * * * * * *
- << Start SCF iteration.
+ DONE(2.789981   SEC) : INIT SCF
  ITER       ETOT/eV          EDIFF/eV         DRHO     TIME/s
- CG1     -2.10297965e+02   0.00000000e+00   2.0054e-02   0.33
- CG2     -2.10317411e+02  -1.94460713e-02   1.8435e-03   0.19
- CG3     -2.10318532e+02  -1.12027319e-03   4.1098e-04   0.20
- CG4     -2.10319494e+02  -9.62247677e-04   2.8479e-05   0.21
- CG5     -2.10319586e+02  -9.21207433e-05   2.7825e-06   0.23
- CG6     -2.10319592e+02  -5.47931137e-06   2.4066e-07   0.21
- CG7     -2.10319593e+02  -9.89652066e-07   4.3308e-08   0.22
- CG8     -2.10319593e+02  -1.68264976e-07   3.9040e-09   0.23
- CG9     -2.10319593e+02   5.72215175e-10   7.9284e-10   0.20
- >> Leave SCF iteration.
- * * * * * *
+ CG1     -2.10297965e+02   0.00000000e+00   2.0054e-02   0.27
+ CG2     -2.10317411e+02  -1.94460713e-02   1.8435e-03   0.16
+ CG3     -2.10318532e+02  -1.12027319e-03   4.1098e-04   0.16
+ CG4     -2.10319494e+02  -9.62247677e-04   2.8479e-05   0.17
+ CG5     -2.10319586e+02  -9.21207433e-05   2.7825e-06   0.19
+ CG6     -2.10319592e+02  -5.47931137e-06   2.4066e-07   0.17
+ CG7     -2.10319593e+02  -9.89652066e-07   4.3308e-08   0.21
+ CG8     -2.10319593e+02  -1.68264976e-07   3.9040e-09   0.19
+ CG9     -2.10319593e+02   5.72215175e-10   7.9284e-10   0.19
 ----------------------------------------------------------------
  TOTAL-STRESS (KBAR)                                            
 ----------------------------------------------------------------
@@ -107,38 +94,25 @@ enter Step
 1.782091 -0.738145 1.481329 
 -1.782091 0.738145 -1.481329 
 enter Step
-PrintPos
-0.055452 -0.034310 0.049957 1.565417 1.222947 1.408825 
-PrintPos0
-0.000000 0.000000 0.000000 1.620869 1.188637 1.458782 
-62.088993 3.499304 -6.651691 7.911007 -3.499304 6.651691 
-3.499304 68.940496 2.775898 -3.499304 1.059504 -2.775898 
--6.651691 2.775898 64.463837 6.651691 -2.775898 5.536163 
-7.911007 -3.499304 6.651691 62.088993 3.499304 -6.651691 
--3.499304 1.059504 -2.775898 3.499304 68.940496 2.775898 
-6.651691 -2.775898 5.536163 -6.651691 2.775898 64.463837 
-40.161962 70.000000 70.000000 70.000000 70.000000 70.824688 
-0.044516 -0.018536 0.037036 
--0.044516 0.018536 -0.037036 
+enter prepareStep3
+enter prepareStep4
+enter prepareStep4
+enter Step3
 0.044516
  -------------------------------------------
  STEP OF ION RELAXATION : 3
  -------------------------------------------
- DONE(5.563705   SEC) : INIT SCF
- * * * * * *
- << Start SCF iteration.
+ DONE(4.794848   SEC) : INIT SCF
  ITER       ETOT/eV          EDIFF/eV         DRHO     TIME/s
  CG1     -2.10498385e+02   0.00000000e+00   4.9091e-03   0.35
- CG2     -2.10495145e+02   3.24003761e-03   1.2079e-03   0.19
- CG3     -2.10497627e+02  -2.48236077e-03   7.9036e-05   0.23
- CG4     -2.10497784e+02  -1.56527885e-04   8.7928e-06   0.21
- CG5     -2.10497808e+02  -2.46105727e-05   5.3092e-06   0.24
- CG6     -2.10497819e+02  -1.06809507e-05   5.4730e-08   0.20
+ CG2     -2.10495145e+02   3.24003761e-03   1.2079e-03   0.20
+ CG3     -2.10497627e+02  -2.48236077e-03   7.9036e-05   0.25
+ CG4     -2.10497784e+02  -1.56527885e-04   8.7928e-06   0.22
+ CG5     -2.10497808e+02  -2.46105727e-05   5.3092e-06   0.25
+ CG6     -2.10497819e+02  -1.06809507e-05   5.4730e-08   0.21
  CG7     -2.10497820e+02  -5.24139118e-07   2.4261e-08   0.27
- CG8     -2.10497820e+02  -5.49986128e-08   1.9766e-09   0.22
+ CG8     -2.10497820e+02  -5.49986128e-08   1.9766e-09   0.20
  CG9     -2.10497820e+02  -7.43275513e-09   1.2896e-10   0.23
- >> Leave SCF iteration.
- * * * * * *
 ----------------------------------------------------------------
  TOTAL-STRESS (KBAR)                                            
 ----------------------------------------------------------------
@@ -151,37 +125,24 @@ PrintPos0
 0.722191 -0.642841 -0.625282 
 -0.722191 0.642841 0.625282 
 enter Step
-PrintPos
-0.099968 -0.052845 0.086993 1.520901 1.241483 1.371789 
-PrintPos0
-0.055452 -0.034310 0.049957 1.565417 1.222947 1.408825 
-55.730801 7.567042 -6.821234 14.269199 -7.567042 6.821234 
-7.567042 67.126811 5.697096 -7.567042 2.873189 -5.697096 
--6.821234 5.697096 74.490259 6.821234 -5.697096 -4.490259 
-14.269199 -7.567042 6.821234 55.730801 7.567042 -6.821234 
--7.567042 2.873189 -5.697096 7.567042 67.126811 5.697096 
-6.821234 -5.697096 -4.490259 -6.821234 5.697096 74.490259 
-28.001364 70.000000 70.000000 70.000000 70.769450 85.924928 
-0.022241 -0.014939 -0.002037 
--0.022241 0.014939 0.002037 
+enter prepareStep3
+enter prepareStep4
+enter prepareStep4
+enter Step3
 0.022241
  -------------------------------------------
  STEP OF ION RELAXATION : 4
  -------------------------------------------
- DONE(7.980961   SEC) : INIT SCF
- * * * * * *
- << Start SCF iteration.
+ DONE(7.201089   SEC) : INIT SCF
  ITER       ETOT/eV          EDIFF/eV         DRHO     TIME/s
- CG1     -2.10540966e+02   0.00000000e+00   2.4805e-03   0.34
- CG2     -2.10540782e+02   1.83911470e-04   6.8920e-04   0.19
- CG3     -2.10541865e+02  -1.08265326e-03   2.6603e-05   0.22
- CG4     -2.10541939e+02  -7.40361727e-05   1.3588e-06   0.24
- CG5     -2.10541944e+02  -5.47013299e-06   1.7385e-07   0.21
- CG6     -2.10541945e+02  -5.53306938e-07   3.6918e-08   0.23
- CG7     -2.10541945e+02  -1.01380404e-07   1.8052e-09   0.22
- CG8     -2.10541945e+02  -8.16006004e-09   6.8073e-11   0.23
- >> Leave SCF iteration.
- * * * * * *
+ CG1     -2.10540966e+02   0.00000000e+00   2.4805e-03   0.31
+ CG2     -2.10540782e+02   1.83911470e-04   6.8920e-04   0.18
+ CG3     -2.10541865e+02  -1.08265326e-03   2.6603e-05   0.21
+ CG4     -2.10541939e+02  -7.40361727e-05   1.3588e-06   0.22
+ CG5     -2.10541944e+02  -5.47013299e-06   1.7385e-07   0.22
+ CG6     -2.10541945e+02  -5.53306938e-07   3.6918e-08   0.22
+ CG7     -2.10541945e+02  -1.01380404e-07   1.8052e-09   0.26
+ CG8     -2.10541945e+02  -8.16006004e-09   6.8073e-11   0.26
 ----------------------------------------------------------------
  TOTAL-STRESS (KBAR)                                            
 ----------------------------------------------------------------
@@ -194,36 +155,23 @@ PrintPos0
 0.153656 -0.594534 -0.990953 
 -0.153656 0.594534 0.990953 
 enter Step
-PrintPos
-0.122209 -0.067784 0.084957 1.498660 1.256422 1.373826 
-PrintPos0
-0.099968 -0.052845 0.086993 1.520901 1.241483 1.371789 
-58.850342 15.129206 9.904238 11.149658 -15.129206 -9.904238 
-15.129206 59.493552 -2.585101 -15.129206 10.506448 2.585101 
-9.904238 -2.585101 72.345495 -9.904238 2.585101 -2.345495 
-11.149658 -15.129206 -9.904238 58.850342 15.129206 9.904238 
--15.129206 10.506448 2.585101 15.129206 59.493552 -2.585101 
--9.904238 2.585101 -2.345495 9.904238 -2.585101 72.345495 
-12.839387 69.497979 70.000000 70.000000 70.000000 89.041412 
-0.041764 -0.041506 -0.027442 
--0.041764 0.041506 0.027442 
+enter prepareStep3
+enter prepareStep4
+enter prepareStep4
+enter Step3
 0.041764
  -------------------------------------------
  STEP OF ION RELAXATION : 5
  -------------------------------------------
- DONE(10.119294  SEC) : INIT SCF
- * * * * * *
- << Start SCF iteration.
+ DONE(9.357853   SEC) : INIT SCF
  ITER       ETOT/eV          EDIFF/eV         DRHO     TIME/s
- CG1     -2.10531790e+02   0.00000000e+00   5.6554e-04   0.38
- CG2     -2.10532276e+02  -4.86153175e-04   2.0544e-04   0.19
- CG3     -2.10532623e+02  -3.47284148e-04   6.8772e-06   0.26
- CG4     -2.10532644e+02  -2.08474803e-05   5.3711e-07   0.25
- CG5     -2.10532646e+02  -2.28647195e-06   5.0570e-08   0.24
- CG6     -2.10532646e+02  -1.54124644e-07   1.4373e-09   0.27
- CG7     -2.10532646e+02  -6.94546832e-09   2.5955e-10   0.24
- >> Leave SCF iteration.
- * * * * * *
+ CG1     -2.10531790e+02   0.00000000e+00   5.6554e-04   0.39
+ CG2     -2.10532276e+02  -4.86153175e-04   2.0544e-04   0.21
+ CG3     -2.10532623e+02  -3.47284148e-04   6.8772e-06   0.30
+ CG4     -2.10532644e+02  -2.08474803e-05   5.3711e-07   0.28
+ CG5     -2.10532646e+02  -2.28647195e-06   5.0570e-08   0.28
+ CG6     -2.10532646e+02  -1.54124644e-07   1.4373e-09   0.26
+ CG7     -2.10532646e+02  -6.94546832e-09   2.5955e-10   0.26
 ----------------------------------------------------------------
  TOTAL-STRESS (KBAR)                                            
 ----------------------------------------------------------------
@@ -236,114 +184,104 @@ PrintPos0
 -1.164840 0.741963 -0.124408 
 1.164840 -0.741963 0.124408 
 enter Step
-PrintPos
-0.163973 -0.109290 0.057514 1.456896 1.297928 1.401268 
-PrintPos0
-0.122209 -0.067784 0.084957 1.498660 1.256422 1.373826 
-65.021045 9.548721 7.223423 4.978955 -9.548721 -7.223423 
-9.548721 62.953222 -3.395443 -9.548721 7.046778 3.395443 
-7.223423 -3.395443 66.917075 -7.223423 3.395443 3.082925 
-4.978955 -9.548721 -7.223423 65.021045 9.548721 7.223423 
--9.548721 7.046778 3.395443 9.548721 62.953222 -3.395443 
--7.223423 3.395443 3.082925 7.223423 -3.395443 66.917075 
-31.826059 67.421565 70.000000 70.000000 70.000000 80.535060 
--0.029392 0.024569 0.007462 
-0.029392 -0.024569 -0.007462 
+enter prepareStep3
+enter prepareStep4
+enter prepareStep4
+enter Step3
 0.029392
 TIME STATISTICS
 -----------------------------------------------------------------------------
     CLASS_NAME                NAME             TIME/s  CALLS   AVG/s  PER/%  
 -----------------------------------------------------------------------------
-                   total                       12.12  25       0.48   100.00 
+                   total                       11.51  25       0.46   100.00 
  Driver            reading                     0.01   1        0.01   0.05   
  Input_Conv        Convert                     0.00   1        0.00   0.00   
- Driver            driver_line                 12.11  1        12.11  99.95  
+ Driver            driver_line                 11.50  1        11.50  99.95  
  UnitCell          check_tau                   0.00   1        0.00   0.00   
  PW_Basis_Sup      setuptransform              0.00   1        0.00   0.04   
  PW_Basis_Sup      distributeg                 0.00   1        0.00   0.02   
  mymath            heapsort                    0.00   207      0.00   0.01   
- Symmetry          analy_sys                   0.11   1        0.11   0.94   
+ Symmetry          analy_sys                   0.11   1        0.11   0.96   
  PW_Basis_K        setuptransform              0.00   1        0.00   0.03   
  PW_Basis_K        distributeg                 0.00   1        0.00   0.02   
- PW_Basis          setup_struc_factor          0.01   5        0.00   0.09   
+ PW_Basis          setup_struc_factor          0.01   5        0.00   0.08   
  ppcell_vnl        init                        0.00   1        0.00   0.01   
  ppcell_vl         init_vloc                   0.00   1        0.00   0.02   
- ppcell_vnl        init_vnl                    0.04   1        0.04   0.37   
+ ppcell_vnl        init_vnl                    0.06   1        0.06   0.53   
  WF_atomic         init_at_1                   0.00   1        0.00   0.00   
  wavefunc          wfcinit                     0.00   1        0.00   0.00   
- Ions              opt_ions                    11.61  1        11.61  95.76  
- ESolver_KS_PW     runner                      10.95  5        2.19   90.32  
- ESolver_KS_PW     before_scf                  0.53   5        0.11   4.41   
- H_Ewald_pw        compute_ewald               0.02   5        0.00   0.19   
+ Ions              opt_ions                    11.03  1        11.03  95.84  
+ ESolver_KS_PW     runner                      10.39  5        2.08   90.35  
+ ESolver_KS_PW     before_scf                  0.49   5        0.10   4.22   
+ H_Ewald_pw        compute_ewald               0.01   5        0.00   0.05   
  Charge            set_rho_core                0.00   5        0.00   0.01   
- Charge            atomic_rho                  0.16   10       0.02   1.36   
- PW_Basis_Sup      recip2real                  1.12   360      0.00   9.22   
- PW_Basis_Sup      gathers_scatterp            0.19   360      0.00   1.54   
- Potential         init_pot                    0.32   5        0.06   2.63   
- Potential         update_from_charge          2.88   48       0.06   23.73  
- Potential         cal_fixed_v                 0.02   5        0.00   0.16   
- PotLocal          cal_fixed_v                 0.02   5        0.00   0.16   
- Potential         cal_v_eff                   2.85   48       0.06   23.55  
- H_Hartree_pw      v_hartree                   0.44   48       0.01   3.64   
- PW_Basis_Sup      real2recip                  1.06   469      0.00   8.78   
- PW_Basis_Sup      gatherp_scatters            0.12   469      0.00   0.97   
- PotXC             cal_v_eff                   2.40   48       0.05   19.80  
- XC_Functional     v_xc                        2.39   48       0.05   19.74  
+ Charge            atomic_rho                  0.16   10       0.02   1.39   
+ PW_Basis_Sup      recip2real                  1.08   360      0.00   9.43   
+ PW_Basis_Sup      gathers_scatterp            0.23   360      0.00   2.03   
+ Potential         init_pot                    0.30   5        0.06   2.64   
+ Potential         update_from_charge          2.78   48       0.06   24.16  
+ Potential         cal_fixed_v                 0.02   5        0.00   0.15   
+ PotLocal          cal_fixed_v                 0.02   5        0.00   0.14   
+ Potential         cal_v_eff                   2.76   48       0.06   24.00  
+ H_Hartree_pw      v_hartree                   0.42   48       0.01   3.63   
+ PW_Basis_Sup      real2recip                  1.08   469      0.00   9.35   
+ PW_Basis_Sup      gatherp_scatters            0.21   469      0.00   1.85   
+ PotXC             cal_v_eff                   2.33   48       0.05   20.26  
+ XC_Functional     v_xc                        2.32   48       0.05   20.20  
  Potential         interpolate_vrs             0.00   48       0.00   0.01   
- Symmetry          rhog_symmetry               0.44   52       0.01   3.60   
- Symmetry          group fft grids             0.12   52       0.00   0.95   
+ Symmetry          rhog_symmetry               0.41   52       0.01   3.59   
+ Symmetry          group fft grids             0.11   52       0.00   0.95   
  Charge_Mixing     init_mixing                 0.00   5        0.00   0.00   
- ESolver_KS_PW     hamilt2density_single       6.97   47       0.15   57.49  
- HSolverPW         solve                       6.16   47       0.13   50.79  
- Nonlocal          getvnl                      0.11   94       0.00   0.89   
- pp_cell_vnl       getvnl                      0.11   94       0.00   0.88   
+ ESolver_KS_PW     hamilt2density_single       6.57   47       0.14   57.07  
+ HSolverPW         solve                       5.77   47       0.12   50.18  
+ Nonlocal          getvnl                      0.10   94       0.00   0.84   
+ pp_cell_vnl       getvnl                      0.10   94       0.00   0.84   
  Structure_Factor  get_sk                      0.02   114      0.00   0.15   
- DiagoIterAssist   diagH_subspace              1.00   90       0.01   8.23   
- Operator          hPsi                        4.31   2520     0.00   35.53  
+ DiagoIterAssist   diagH_subspace              0.95   90       0.01   8.24   
+ Operator          hPsi                        4.15   2520     0.00   36.04  
  Operator          EkineticPW                  0.05   2520     0.00   0.43   
- Operator          VeffPW                      4.14   2520     0.00   34.13  
- PW_Basis_K        recip2real                  2.82   3902     0.00   23.26  
- PW_Basis_K        gathers_scatterp            1.36   3902     0.00   11.20  
- PW_Basis_K        real2recip                  1.38   3150     0.00   11.38  
- PW_Basis_K        gatherp_scatters            0.28   3150     0.00   2.27   
- Operator          NonlocalPW                  0.10   2520     0.00   0.84   
- Nonlocal          add_nonlocal_pp             0.05   2520     0.00   0.42   
+ Operator          VeffPW                      3.99   2520     0.00   34.66  
+ PW_Basis_K        recip2real                  2.64   3902     0.00   22.95  
+ PW_Basis_K        gathers_scatterp            1.33   3902     0.00   11.53  
+ PW_Basis_K        real2recip                  1.42   3150     0.00   12.31  
+ PW_Basis_K        gatherp_scatters            0.43   3150     0.00   3.73   
+ Operator          NonlocalPW                  0.10   2520     0.00   0.83   
+ Nonlocal          add_nonlocal_pp             0.04   2520     0.00   0.37   
  DiagoIterAssist   diagH_LAPACK                0.00   90       0.00   0.03   
- DiagoCG           diag_once                   3.89   94       0.04   32.08  
- DiagoCG_New       spsi_func                   0.02   4860     0.00   0.14   
- DiagoCG_New       hpsi_func                   3.34   2430     0.00   27.54  
- ElecStatePW       psiToRho                    1.14   47       0.02   9.43   
- Charge            rho_mpi                     0.14   47       0.00   1.16   
- Charge            reduce_diff_pools           0.14   47       0.00   1.16   
- Charge_Mixing     get_drho                    0.27   47       0.01   2.25   
+ DiagoCG           diag_once                   3.76   94       0.04   32.67  
+ DiagoCG_New       spsi_func                   0.02   4860     0.00   0.13   
+ DiagoCG_New       hpsi_func                   3.23   2430     0.00   28.05  
+ ElecStatePW       psiToRho                    0.89   47       0.02   7.72   
+ Charge            rho_mpi                     0.05   47       0.00   0.40   
+ Charge            reduce_diff_pools           0.05   47       0.00   0.40   
+ Charge_Mixing     get_drho                    0.26   47       0.01   2.23   
  Charge_Mixing     inner_product_recip_rho     0.03   47       0.00   0.23   
- Charge            mix_rho                     0.35   38       0.01   2.88   
- Charge            Broyden_mixing              0.15   38       0.00   1.24   
- Charge_Mixing     inner_product_recip_hartree 0.15   256      0.00   1.21   
- ESolver_KS_PW     after_scf                   0.15   5        0.03   1.20   
- ModuleIO          write_rhog                  0.04   5        0.01   0.30   
+ Charge            mix_rho                     0.34   38       0.01   2.96   
+ Charge            Broyden_mixing              0.16   38       0.00   1.36   
+ Charge_Mixing     inner_product_recip_hartree 0.15   256      0.00   1.33   
+ ESolver_KS_PW     after_scf                   0.15   5        0.03   1.32   
+ ModuleIO          write_rhog                  0.04   5        0.01   0.33   
+ Forces            cal_force                   0.13   5        0.03   1.12   
  Forces            cal_force_loc               0.02   5        0.00   0.20   
- Forces            cal_force_ew                0.02   5        0.00   0.13   
- Forces            cal_force_nl                0.03   5        0.01   0.29   
- FS_Nonlocal_tools cal_becp                    0.02   20       0.00   0.19   
- FS_Nonlocal_tools cal_dbecp_f                 0.02   30       0.00   0.19   
+ Forces            cal_force_ew                0.01   5        0.00   0.13   
+ Forces            cal_force_nl                0.04   5        0.01   0.36   
+ FS_Nonlocal_tools cal_becp                    0.12   10       0.01   1.02   
  Forces            cal_force_cc                0.00   5        0.00   0.00   
- Forces            cal_force_scc               0.05   5        0.01   0.42   
- Stress_PW         cal_stress                  0.53   5        0.11   4.38   
- Stress_Func       stress_kin                  0.03   5        0.01   0.23   
+ Forces            cal_force_scc               0.05   5        0.01   0.43   
+ Stress_PW         cal_stress                  0.50   5        0.10   4.36   
+ Stress_Func       stress_kin                  0.01   5        0.00   0.10   
  Stress_Func       stress_har                  0.02   5        0.00   0.20   
- Stress_Func       stress_ewa                  0.02   5        0.00   0.16   
- Stress_Func       stress_gga                  0.15   5        0.03   1.25   
- Stress_Func       stress_loc                  0.09   5        0.02   0.72   
+ Stress_Func       stress_ewa                  0.02   5        0.00   0.15   
+ Stress_Func       stress_gga                  0.16   5        0.03   1.38   
+ Stress_Func       stress_loc                  0.08   5        0.02   0.66   
  Stress_Func       stress_cc                   0.00   5        0.00   0.00   
- Stress_Func       stress_nl                   0.22   5        0.04   1.81   
- FS_Nonlocal_tools cal_dbecp_s                 0.20   60       0.00   1.65   
- Charge_Extra      extrapolate_charge          0.08   4        0.02   0.65   
+ Stress_Func       stress_nl                   0.21   5        0.04   1.86   
+ Charge_Extra      extrapolate_charge          0.07   4        0.02   0.62   
  ModuleIO          write_istate_info           0.00   1        0.00   0.00   
 -----------------------------------------------------------------------------
 
 
- START  Time  : Thu Nov 14 10:18:10 2024
- FINISH Time  : Thu Nov 14 10:18:22 2024
- TOTAL  Time  : 12
+ START  Time  : Fri Nov 15 08:03:09 2024
+ FINISH Time  : Fri Nov 15 08:03:20 2024
+ TOTAL  Time  : 11
  SEE INFORMATION IN : OUT.autotest/

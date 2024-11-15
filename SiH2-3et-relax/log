@@ -9,13 +9,13 @@
                               https://github.com/deepmodeling/abacus-develop         
                       Commit: unknown
 
- Fri Nov 15 07:24:01 2024
+ Fri Nov 15 08:05:02 2024
  MAKE THE DIR         : OUT.abacus/
  RUNNING WITH DEVICE  : CPU / 13th Gen Intel(R) Core(TM) i7-13700KF
  UNIFORM GRID DIM        : 256 * 256 * 256
  UNIFORM GRID DIM(BIG)   : 256 * 256 * 256
- DONE(2.0302     SEC) : SETUP UNITCELL
- DONE(2.10551    SEC) : INIT K-POINTS
+ DONE(2.46674    SEC) : SETUP UNITCELL
+ DONE(2.71952    SEC) : INIT K-POINTS
  ---------------------------------------------------------
  Ion relaxation calculations
  ---------------------------------------------------------
@@ -30,29 +30,15 @@
  ---------------------------------------------------------
  Initial plane wave basis and FFT box
  ---------------------------------------------------------
- DONE(2.98353    SEC) : INIT PLANEWAVE
- DONE(4.27888    SEC) : LOCAL POTENTIAL
- DONE(4.41184    SEC) : NON-LOCAL POTENTIAL
+ DONE(3.80033    SEC) : INIT PLANEWAVE
+ DONE(5.7434     SEC) : LOCAL POTENTIAL
+ DONE(5.97613    SEC) : NON-LOCAL POTENTIAL
  MEMORY FOR PSI (MB)  : 61.8411
- DONE(4.60712    SEC) : INIT BASIS
+ DONE(6.25469    SEC) : INIT BASIS
  -------------------------------------------
  STEP OF ION RELAXATION : 1
  -------------------------------------------
  START CHARGE      : atomic
- DONE(18.8758    SEC) : INIT SCF
+ DONE(26.3435    SEC) : INIT SCF
  ITER      TMAG       AMAG        ETOT/eV          EDIFF/eV         DRHO     TIME/s
- DA1      2.00e+00   2.03e+00  -1.36488047e+02   0.00000000e+00   3.9185e-01  55.42
- DA2      2.00e+00   2.03e+00  -1.35639323e+02   8.48724853e-01   2.9515e-01  32.58
- DA3      2.00e+00   2.03e+00  -1.35175018e+02   4.64304219e-01   1.2141e-01  28.61
- DA4      2.00e+00   2.03e+00  -1.35231536e+02  -5.65178630e-02   2.5339e-02  37.91
- DA5      2.00e+00   2.02e+00  -1.35222711e+02   8.82512136e-03   1.0236e-02  48.13
- DA6      2.00e+00   2.02e+00  -1.35217865e+02   4.84660755e-03   3.1181e-03  45.60
- DA7      2.00e+00   2.02e+00  -1.35217872e+02  -7.33928889e-06   5.5952e-04  55.50
- DA8      2.00e+00   2.02e+00  -1.35201171e+02   1.67013151e-02   3.9924e-04  41.44
- DA9      2.00e+00   2.02e+00  -1.35194998e+02   6.17261755e-03   4.3632e-05  43.46
- DA10     2.00e+00   2.02e+00  -1.35193314e+02   1.68393041e-03   2.5192e-05  85.27
- DA11     2.00e+00   2.02e+00  -1.35189848e+02   3.46604543e-03   8.9616e-06  52.49
- DA12     2.00e+00   2.02e+00  -1.35189045e+02   8.02713411e-04   1.7975e-06 114.13
- DA13     2.00e+00   2.02e+00  -1.35188238e+02   8.07283414e-04   8.9097e-07 156.70
- DA14     2.00e+00   2.02e+00  -1.35188208e+02   3.00653633e-05   3.6123e-07 194.82
- DA15     2.00e+00   2.02e+00  -1.35188171e+02   3.68581656e-05   1.0798e-07 238.54
+ DA1      2.00e+00   2.03e+00  -1.36488047e+02   0.00000000e+00   3.9185e-01  67.66

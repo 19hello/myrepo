@@ -16,7 +16,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
     if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax" )
     {
-        if(PARAM.inp.relax_method == "relax_trad")
+        if(PARAM.inp.relax_method == "bfgs_trad")
         {
             mybfgs.initialize(GlobalC::ucell.nat);
         }
