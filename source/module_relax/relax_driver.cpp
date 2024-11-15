@@ -14,9 +14,13 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
     ModuleBase::TITLE("Ions", "opt_ions");
     ModuleBase::timer::tick("Ions", "opt_ions");
 
-    if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax")
+    if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax" )
     {
-        if (!PARAM.inp.relax_new)
+        if(PARAM.inp.relax_method == "relax_trad")
+        {
+            mybfgs.initialize(GlobalC::ucell.nat);
+        }
+        else if (!PARAM.inp.relax_new)
         {
             rl_old.init_relax(GlobalC::ucell.nat);
         }
@@ -25,7 +29,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
             rl.init_relax(GlobalC::ucell.nat);
         }
     }
-    mybfgs.initialize(GlobalC::ucell.nat);
+    
 
     this->istep = 1;
     int force_step = 1; // pengfei Li 2018-05-14
@@ -78,10 +82,27 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
             if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax")
             {
-                /*if (PARAM.inp.relax_new)
+                if(PARAM.inp.relax_method == "bfgs_trad")
+                {
+                    std::vector<std::vector<double>> _force(force.nr,std::vector<double>(force.nc,0));
+                    for(int i = 0; i < force.nr; i++)
+                    {
+
+                        for(int j=0;j<force.nc;j++)
+                        {
+                            _force[i][j]=force(i,j)*13.605693009/ModuleBase::BOHR_TO_A;
+                            //std::cout<<_force[i][j]<<' ';
+                        }
+                        //std::cout<<std::endl;
+                    }
+                    stop=mybfgs.Step(_force,GlobalC::ucell);
+                }
+
+                else if (PARAM.inp.relax_new)
                 {
                     stop = rl.relax_step(force, stress, this->etot);
                 }
+
                 else
                 {
                     stop = rl_old.relax_step(istep,
@@ -91,19 +112,8 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
                                              stress,
                                              force_step,
                                              stress_step); // pengfei Li 2018-05-14
-                }*/
-                std::vector<std::vector<double>> _force(force.nr,std::vector<double>(force.nc,0));
-                for(int i = 0; i < force.nr; i++)
-                {
-
-                    for(int j=0;j<force.nc;j++)
-                    {
-                        _force[i][j]=force(i,j)*13.605693009/ModuleBase::BOHR_TO_A;
-                        std::cout<<_force[i][j]<<' ';
-                    }
-                    std::cout<<std::endl;
                 }
-                stop=mybfgs.Step(_force,GlobalC::ucell);
+                
                 
                 // print structure
                 // changelog 20240509

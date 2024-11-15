@@ -12,7 +12,7 @@ void ReadInput::item_relax()
         item.annotation = "cg; bfgs; sd; cg; cg_bfgs;";
         read_sync_string(input.relax_method);
         item.check_value = [](const Input_Item& item, const Parameter& para) {
-            const std::vector<std::string> relax_methods = {"cg", "bfgs", "sd", "cg_bfgs"};
+            const std::vector<std::string> relax_methods = {"cg", "bfgs", "sd", "cg_bfgs","bfgs_trad"};
             if (!find_str(relax_methods, para.input.relax_method))
             {
                 const std::string warningstr = nofound_str(relax_methods, "relax_method");
