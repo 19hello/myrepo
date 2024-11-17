@@ -12,6 +12,7 @@ void ReadInput::item_relax()
         item.annotation = "cg; bfgs; sd; cg; cg_bfgs;";
         read_sync_string(input.relax_method);
         item.check_value = [](const Input_Item& item, const Parameter& para) {
+
             const std::vector<std::string> relax_methods = {"cg", "bfgs", "sd", "cg_bfgs","bfgs_trad"};
             if (!find_str(relax_methods, para.input.relax_method))
             {
@@ -52,7 +53,7 @@ void ReadInput::item_relax()
             const std::string& calculation = para.input.calculation;
             const std::vector<std::string> singlelist
                 = {"scf", "nscf", "get_S", "get_pchg", "get_wf", "test_memory", "test_neighbour", "gen_bessel"};
-            if (find_str(singlelist, calculation))
+            if (std::find(singlelist.begin(), singlelist.end(), calculation) != singlelist.end())
             {
                 para.input.relax_nmax = 1;
             }
