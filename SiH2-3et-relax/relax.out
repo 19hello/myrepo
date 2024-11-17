@@ -1,7 +1,0 @@
-      Step     Time          Energy          fmax
-BFGS:    0 12:01:24     -135.186543        0.192194
-BFGS:    1 12:04:16     -135.187369        0.131104
-BFGS:    2 12:07:10     -135.188012        0.025128
-BFGS:    3 12:09:58     -135.188032        0.023977
-BFGS:    4 12:12:50     -135.188153        0.001422
-Final structure is saved in SiH2-pos-fin.cif
