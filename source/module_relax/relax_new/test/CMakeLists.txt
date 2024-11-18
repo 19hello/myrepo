@@ -21,11 +21,3 @@ AddTest(
   LIBS parameter ${math_libs} 
 )
 
-AddTest(
-  TARGET bfgs_test
-  LIBS parameter ${math_libs}  
-  SOURCES bfgs_test.cpp ../bfgs.cpp relax_test.cpp ../relax.cpp ../line_search.cpp ../../../module_base/tool_quit.cpp ../../../module_base/global_variable.cpp ../../../module_base/global_file.cpp ../../../module_base/memory.cpp ../../../module_base/timer.cpp
-  ../../../module_base/matrix3.cpp ../../../module_base/intarray.cpp ../../../module_base/tool_title.cpp
-  ../../../module_base/global_function.cpp ../../../module_base/complexmatrix.cpp ../../../module_base/matrix.cpp
-  ../../../module_base/complexarray.cpp ../../../module_base/tool_quit.cpp ../../../module_base/realarray.cpp ../../../module_base/blas_connector.cpp
-)

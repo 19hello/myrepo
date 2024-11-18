@@ -18,7 +18,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
     {
         if(PARAM.inp.relax_method == "bfgs_trad")
         {
-            bfgs_trad.init_relax(GlobalC::ucell.nat,GlobalC::ucell);
+            bfgs_trad.init_relax(GlobalC::ucell.nat,GlobalC::ucell,PARAM.inp.relax_bfgs_rmax);
         }
         else if (!PARAM.inp.relax_new)
         {

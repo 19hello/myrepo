@@ -1,12 +1,12 @@
 #include "bfgs.h"
 #include "module_hamilt_pw/hamilt_pwdft/global.h"
 #include "module_base/matrix3.h"
+#include "module_relax/relax_old/ions_move_basic.h"
 
-
-void BFGS::init_relax(const int _size,UnitCell& ucell) // initialize H0、H、pos0、force0、force
+void BFGS::init_relax(const int _size,UnitCell& ucell,double _maxstep) // initialize H0、H、pos0、force0、force
 {
     alpha=70;//relax_scale_force
-    maxstep=100; 
+    maxstep=_maxstep; 
     size=_size;
     sign =true;
     H = std::vector<std::vector<double>>(3*size, std::vector<double>(3*size, 0.0));

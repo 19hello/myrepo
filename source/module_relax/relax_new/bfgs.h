@@ -10,12 +10,13 @@
 #include "module_base/matrix.h"
 #include "module_base/matrix3.h"
 
+
 class BFGS
 {
 public:
     
     double alpha;//initialize H,diagonal element is alpha
-    int maxstep;//every movement smaller than maxstep
+    double maxstep;//every movement smaller than maxstep
     int size;//number of etoms
     
     
@@ -26,8 +27,9 @@ public:
     std::vector<double> pos0;
     std::vector<std::vector<double>> pos;
     std::vector<std::vector<double>> dpos;
-    void init_relax(const int _size,UnitCell& ucell);
-    bool relax_step(ModuleBase::matrix _force,UnitCell& ucell);
+
+    void init_relax(const int _size,UnitCell& ucell,double _maxstep);//initialize parameters
+    bool relax_step(ModuleBase::matrix _force,UnitCell& ucell);//
     void PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength);
     bool IsRestrain(std::vector<std::vector<double>>& dpos);
 
