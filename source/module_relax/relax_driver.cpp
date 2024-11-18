@@ -18,7 +18,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
     {
         if(PARAM.inp.relax_method == "bfgs_trad")
         {
-            mybfgs.initialize(GlobalC::ucell.nat);
+            bfgs_trad.init_relax(GlobalC::ucell.nat,GlobalC::ucell);
         }
         else if (!PARAM.inp.relax_new)
         {
@@ -83,26 +83,14 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
             if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax")
             {
                 if(PARAM.inp.relax_method == "bfgs_trad")
-                {
-                    std::vector<std::vector<double>> _force(force.nr,std::vector<double>(force.nc,0));
-                    for(int i = 0; i < force.nr; i++)
-                    {
-
-                        for(int j=0;j<force.nc;j++)
-                        {
-                            _force[i][j]=force(i,j)*13.605693009/ModuleBase::BOHR_TO_A;
-                            //std::cout<<_force[i][j]<<' ';
-                        }
-                        //std::cout<<std::endl;
-                    }
-                    stop=mybfgs.Step(_force,GlobalC::ucell);
+                {   
+                    stop=bfgs_trad.relax_step(force,GlobalC::ucell);
                 }
 
                 else if (PARAM.inp.relax_new)
                 {
                     stop = rl.relax_step(force, stress, this->etot);
                 }
-
                 else
                 {
                     stop = rl_old.relax_step(istep,

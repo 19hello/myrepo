@@ -3,10 +3,10 @@
 #include "module_base/matrix3.h"
 
 
-void bfgs::initialize(int _size) // initialize H0、H、pos0、force0、force
+void BFGS::init_relax(const int _size,UnitCell& ucell) // initialize H0、H、pos0、force0、force
 {
     alpha=70;//relax_scale_force
-    maxstep=100; //relax_nmax
+    maxstep=100; 
     size=_size;
     sign =true;
     H = std::vector<std::vector<double>>(3*size, std::vector<double>(3*size, 0.0));
@@ -19,36 +19,45 @@ void bfgs::initialize(int _size) // initialize H0、H、pos0、force0、force
     force0 = std::vector<double>(3*size, 0.0);
     force = std::vector<std::vector<double>>(size, std::vector<double>(3, 0.0));
     steplength = std::vector<double>(size, 0.0);
-    GetPos();
+    this->GetPos(ucell,pos);
     
 }
 
-bool bfgs::Step(std::vector<std::vector<double>> _force,UnitCell& ucell) 
+bool BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell) 
 {
     std::cout<<"enter Step"<<std::endl;
-    GlobalC::ucell.ionic_position_updated = true;
-    force = _force;
+    ucell.ionic_position_updated = true;
+    for(int i = 0; i < _force.nr; i++)
+    {
+
+        for(int j=0;j<_force.nc;j++)
+        {
+            force[i][j]=_force(i,j)*ModuleBase::Ry_to_eV/ModuleBase::BOHR_TO_A;
+            std::cout<<force[i][j]<<' ';
+        }
+        std::cout<<std::endl;
+    }
     //std::cout<<"enter Step0"<<std::endl;
     //std::cout<<size<<std::endl;
     //GetPos(ucell);
-    PrepareStep();
+    this->PrepareStep(force,pos,H,pos0,force0,steplength);
     //std::cout<<"enter Step1"<<std::endl;
-    DetermineStep();
-    //std::cout<<"enter Step2"<<std::endl;
-    /*for(int i=0;i<size;i++)
+    this->DetermineStep(steplength,dpos,maxstep);
+    std::cout<<"enter Step2"<<std::endl;
+    for(int i=0;i<size;i++)
     {
         for(int j=0;j<3;j++)
         {
             std::cout<<dpos[i][j]<<' ';
         }
         std::cout<<std::endl;
-    }*/
-    UpdatePos();
+    }
+    this->UpdatePos(ucell);
     //std::cout<<"enter Step3"<<std::endl;
-    return IsRestrain();
+    return this->IsRestrain(dpos);
 }
 
-void bfgs::GetPos()
+void BFGS::GetPos(UnitCell& ucell,std::vector<std::vector<double>>& pos)
 {
     int k=0;
     for(int i=0;i<GlobalC::ucell.ntype;i++)
@@ -64,22 +73,22 @@ void bfgs::GetPos()
 }
 
 
-void bfgs::PrepareStep()
+void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength)
 {
     //std::cout<<"enter prepareStep0"<<std::endl;
-    std::vector<double> changedforce = ReshapeMToV(force);
-    std::vector<double> changedpos = ReshapeMToV(pos);
+    std::vector<double> changedforce = this->ReshapeMToV(force);
+    std::vector<double> changedpos = this->ReshapeMToV(pos);
     //std::cout<<"enter prepareStep1"<<std::endl;
-    Update(changedpos, changedforce);
+    this->Update(changedpos, changedforce,H);
     //std::cout<<"enter prepareStep2"<<std::endl;
-    /*for(int i = 0; i < 3*size; i++)
+    for(int i = 0; i < 3*size; i++)
     {
         for(int j = 0; j < 3*size; j++)
         {
             std::cout<<H[i][j]<<' ';
         }
         std::cout<<std::endl;
-    }*/
+    }
     //call dysev
     //std::cout<<size<<std::endl;
     std::vector<double> omega(3*size);
@@ -112,16 +121,16 @@ void bfgs::PrepareStep()
         std::cout<<omega[i]<<' ';
     }
     std::cout<<std::endl;*/
-    std::vector<double> a=DotInMAndV2(V, changedforce);
+    std::vector<double> a=this->DotInMAndV2(V, changedforce);
     for(int i = 0; i < a.size(); i++)
     {
         a[i] /= abs(omega[i]);
     }
 
-    std::vector<double> tmpdpos = DotInMAndV1(V, a);
+    std::vector<double> tmpdpos = this->DotInMAndV1(V, a);
 
 
-    dpos = ReshapeVToM(tmpdpos);
+    dpos = this->ReshapeVToM(tmpdpos);
     for(int i = 0; i < size; i++)
     {
         double k = 0;
@@ -131,11 +140,11 @@ void bfgs::PrepareStep()
         }
         steplength[i] = sqrt(k);
     }
-    pos0 = ReshapeMToV(pos);
-    force0 = ReshapeMToV(force);
+    pos0 = this->ReshapeMToV(pos);
+    force0 = this->ReshapeMToV(force);
 }
 
-void bfgs::Update(std::vector<double> pos, std::vector<double> force)
+void BFGS::Update(std::vector<double> pos, std::vector<double> force,std::vector<std::vector<double>>& H)
 {
     if(sign)
     {
@@ -154,20 +163,20 @@ void bfgs::Update(std::vector<double> pos, std::vector<double> force)
         std::cout<<pos0[i]<<' ';
     }
     std::cout<<std::endl;*/
-    std::vector<double> dpos = VSubV(pos, pos0);
+    std::vector<double> dpos = this->VSubV(pos, pos0);
     if(*max_element(dpos.begin(), dpos.end()) < 1e-7)
     {
         return;
     }
-    std::vector<double> dforce = VSubV(force, force0);
-    double a = DotInVAndV(dpos, dforce);
-    std::vector<double> dg = DotInMAndV1(H, dpos);
-    double b = DotInVAndV(dpos, dg);
-    H = MSubM(H, MPlus(OuterVAndV(dforce, dforce), a));
-    H = MSubM(H, MPlus(OuterVAndV(dg, dg), b));
+    std::vector<double> dforce = this->VSubV(force, force0);
+    double a = this->DotInVAndV(dpos, dforce);
+    std::vector<double> dg = this->DotInMAndV1(H, dpos);
+    double b = this->DotInVAndV(dpos, dg);
+    H = this->MSubM(H, this->MPlus(this->OuterVAndV(dforce, dforce), a));
+    H = this->MSubM(H, this->MPlus(this->OuterVAndV(dg, dg), b));
 }
 
-void bfgs::DetermineStep()
+void BFGS::DetermineStep(std::vector<double> steplength,std::vector<std::vector<double>>& dpos,int maxstep)
 {
     auto maxsteplength = max_element(steplength.begin(), steplength.end());
     double a = *maxsteplength;
@@ -184,7 +193,7 @@ void bfgs::DetermineStep()
     }
 }
 
-void bfgs::UpdatePos()
+void BFGS::UpdatePos(UnitCell& ucell)
 {
     double move_ion[3*size];
     ModuleBase::zeros(move_ion, size*3);
@@ -225,10 +234,10 @@ void bfgs::UpdatePos()
         }
     }
 	GlobalC::ucell.update_pos_taud(move_ion);
-    pos = MAddM(pos, dpos);
+    pos = this->MAddM(pos, dpos);
 }
 
-bool bfgs::IsRestrain()
+bool BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
 {
     double a=0;
     for(int i=0;i<size;i++)
@@ -255,7 +264,7 @@ bool bfgs::IsRestrain()
 }
 // matrix methods
 
-std::vector<double> bfgs::ReshapeMToV(std::vector<std::vector<double>> matrix) 
+std::vector<double> BFGS::ReshapeMToV(std::vector<std::vector<double>> matrix) 
 {
     int size = matrix.size();
     std::vector<double> result;
@@ -266,7 +275,7 @@ std::vector<double> bfgs::ReshapeMToV(std::vector<std::vector<double>> matrix)
     return result;
 }
 
-std::vector<std::vector<double>> bfgs::MAddM(std::vector<std::vector<double>> a, std::vector<std::vector<double>> b) 
+std::vector<std::vector<double>> BFGS::MAddM(std::vector<std::vector<double>> a, std::vector<std::vector<double>> b) 
 {
     std::vector<std::vector<double>> result = std::vector<std::vector<double>>(a.size(), std::vector<double>(a[0].size(), 0.0));
     for(int i = 0; i < a.size(); i++)
@@ -279,7 +288,7 @@ std::vector<std::vector<double>> bfgs::MAddM(std::vector<std::vector<double>> a,
     return result;
 }
 
-std::vector<double> bfgs::VSubV(std::vector<double> a, std::vector<double> b) 
+std::vector<double> BFGS::VSubV(std::vector<double> a, std::vector<double> b) 
 {
     std::vector<double> result = std::vector<double>(a.size(), 0.0);
     for(int i = 0; i < a.size(); i++)
@@ -289,7 +298,7 @@ std::vector<double> bfgs::VSubV(std::vector<double> a, std::vector<double> b)
     return result;
 }
 
-std::vector<std::vector<double>> bfgs::ReshapeVToM(std::vector<double> matrix) 
+std::vector<std::vector<double>> BFGS::ReshapeVToM(std::vector<double> matrix) 
 {
     std::vector<std::vector<double>> result = std::vector<std::vector<double>>(matrix.size() / 3, std::vector<double>(3));
     for(int i = 0; i < result.size(); i++)
@@ -302,7 +311,7 @@ std::vector<std::vector<double>> bfgs::ReshapeVToM(std::vector<double> matrix)
     return result;
 }
 
-std::vector<double> bfgs::DotInMAndV1(std::vector<std::vector<double>> matrix, std::vector<double> vec) 
+std::vector<double> BFGS::DotInMAndV1(std::vector<std::vector<double>> matrix, std::vector<double> vec) 
 {
     std::vector<double> result(matrix.size(), 0.0);
     for(int i = 0; i < result.size(); i++)
@@ -314,7 +323,7 @@ std::vector<double> bfgs::DotInMAndV1(std::vector<std::vector<double>> matrix, s
     }
     return result;
 }
-std::vector<double> bfgs::DotInMAndV2(std::vector<std::vector<double>> matrix, std::vector<double> vec) 
+std::vector<double> BFGS::DotInMAndV2(std::vector<std::vector<double>> matrix, std::vector<double> vec) 
 {
     std::vector<double> result(matrix.size(), 0.0);
     for(int i = 0; i < result.size(); i++)
@@ -327,7 +336,7 @@ std::vector<double> bfgs::DotInMAndV2(std::vector<std::vector<double>> matrix, s
     return result;
 }
 
-double bfgs::DotInVAndV(std::vector<double> vec1, std::vector<double> vec2) 
+double BFGS::DotInVAndV(std::vector<double> vec1, std::vector<double> vec2) 
 {
     double result = 0.0;
     for(int i = 0; i < vec1.size(); i++)
@@ -337,7 +346,7 @@ double bfgs::DotInVAndV(std::vector<double> vec1, std::vector<double> vec2)
     return result;
 }
 
-std::vector<std::vector<double>> bfgs::OuterVAndV(std::vector<double> a, std::vector<double> b) 
+std::vector<std::vector<double>> BFGS::OuterVAndV(std::vector<double> a, std::vector<double> b) 
 {
     std::vector<std::vector<double>> result = std::vector<std::vector<double>>(a.size(), std::vector<double>(b.size(), 0.0));
     for(int i = 0; i < a.size(); i++)
@@ -350,7 +359,7 @@ std::vector<std::vector<double>> bfgs::OuterVAndV(std::vector<double> a, std::ve
     return result;
 }
 
-std::vector<std::vector<double>> bfgs::MPlus(std::vector<std::vector<double>> a, double b)
+std::vector<std::vector<double>> BFGS::MPlus(std::vector<std::vector<double>> a, double b)
 {
     std::vector<std::vector<double>> result = std::vector<std::vector<double>>(a.size(), std::vector<double>(a[0].size(), 0.0));
     for(int i = 0; i < a.size(); i++)
@@ -363,7 +372,7 @@ std::vector<std::vector<double>> bfgs::MPlus(std::vector<std::vector<double>> a,
     return result;
 }
 
-std::vector<std::vector<double>> bfgs::MSubM(std::vector<std::vector<double>> a, std::vector<std::vector<double>> b)
+std::vector<std::vector<double>> BFGS::MSubM(std::vector<std::vector<double>> a, std::vector<std::vector<double>> b)
 {
     std::vector<std::vector<double>> result = std::vector<std::vector<double>>(a.size(), std::vector<double>(a[0].size(), 0.0));
     for(int i = 0; i < a.size(); i++)
@@ -376,7 +385,7 @@ std::vector<std::vector<double>> bfgs::MSubM(std::vector<std::vector<double>> a,
     return result;
 }
 
-std::tuple<std::vector<double>, std::vector<std::vector<double>>> bfgs::GetEigenvalueAndEigenVector(std::vector<std::vector<double>> matrix) 
+std::tuple<std::vector<double>, std::vector<std::vector<double>>> BFGS::GetEigenvalueAndEigenVector(std::vector<std::vector<double>> matrix) 
 {
     std::vector<double> omega;
     std::vector<std::vector<double>> V;

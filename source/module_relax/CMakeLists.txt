@@ -6,6 +6,7 @@ add_library(
 
     relax_new/relax.cpp
     relax_new/line_search.cpp
+    relax_new/bfgs.cpp
 
     relax_old/relax_old.cpp
     relax_old/bfgs_basic.cpp
@@ -17,7 +18,7 @@ add_library(
     relax_old/lattice_change_basic.cpp
     relax_old/lattice_change_cg.cpp
     relax_old/lattice_change_methods.cpp
-    bfgs_traditional/bfgs.cpp
+    
 )
 
 if(ENABLE_COVERAGE)

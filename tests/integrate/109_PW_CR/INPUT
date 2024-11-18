@@ -4,25 +4,24 @@ suffix              autotest
 pseudo_dir		../../PP_ORB
 	
 nbands			8
-calculation             relax
+calculation             cell_relax
 #Parameters (Accuracy)
-ecutwfc			50
+ecutwfc			20
 scf_nmax			20
 kpar  2
 nspin 1
 
 basis_type		pw
-relax_nmax                   5
+relax_nmax                   2
 relax_new                    0
-relax_method          bfgs_trad
+
 cal_stress                  1
 stress_thr              1e-6
 cal_force                   1
 force_thr_ev            1.0e-3
-smearing_method sigma
-smearing_sigma 0.01
+
 
 #ks_solver               scalapack_gvx
 mixing_type         broyden
-mixing_beta         0.4
-mixing_gg0          1.0
+mixing_beta         0.7
+mixing_gg0          1.5
