@@ -30,7 +30,7 @@ public:
 
     void init_relax(const int _size,UnitCell& ucell,double _maxstep);//initialize parameters
     bool relax_step(ModuleBase::matrix _force,UnitCell& ucell);//
-    void PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength);
+    void PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength,std::vector<std::vector<double>>& dpos);
     bool IsRestrain(std::vector<std::vector<double>>& dpos);
 
 private:
@@ -39,7 +39,7 @@ private:
     
     void GetPos(UnitCell& ucell,std::vector<std::vector<double>>& pos);
     void Update(std::vector<double> pos, std::vector<double> force,std::vector<std::vector<double>>& H);
-    void DetermineStep(std::vector<double> steplength,std::vector<std::vector<double>>& dpos,int maxstep);
+    void DetermineStep(std::vector<double> steplength,std::vector<std::vector<double>>& dpos,double maxstep);
     void UpdatePos(UnitCell& ucell);
     
 

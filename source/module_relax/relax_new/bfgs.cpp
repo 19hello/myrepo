@@ -6,7 +6,11 @@
 void BFGS::init_relax(const int _size,UnitCell& ucell,double _maxstep) // initialize H0、H、pos0、force0、force
 {
     alpha=70;//relax_scale_force
-    maxstep=_maxstep; 
+    maxstep=_maxstep;
+    if(maxstep==0)
+    {
+        maxstep=0.8;
+    } 
     size=_size;
     sign =true;
     H = std::vector<std::vector<double>>(3*size, std::vector<double>(3*size, 0.0));
@@ -40,18 +44,19 @@ bool BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
     //std::cout<<"enter Step0"<<std::endl;
     //std::cout<<size<<std::endl;
     //GetPos(ucell);
-    this->PrepareStep(force,pos,H,pos0,force0,steplength);
+    this->PrepareStep(force,pos,H,pos0,force0,steplength,dpos);
     //std::cout<<"enter Step1"<<std::endl;
     this->DetermineStep(steplength,dpos,maxstep);
+
     std::cout<<"enter Step2"<<std::endl;
-    for(int i=0;i<size;i++)
+    /*for(int i=0;i<size;i++)
     {
         for(int j=0;j<3;j++)
         {
             std::cout<<dpos[i][j]<<' ';
         }
         std::cout<<std::endl;
-    }
+    }*/
     this->UpdatePos(ucell);
     //std::cout<<"enter Step3"<<std::endl;
     return this->IsRestrain(dpos);
@@ -73,7 +78,7 @@ void BFGS::GetPos(UnitCell& ucell,std::vector<std::vector<double>>& pos)
 }
 
 
-void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength)
+void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength,std::vector<std::vector<double>>& dpos)
 {
     //std::cout<<"enter prepareStep0"<<std::endl;
     std::vector<double> changedforce = this->ReshapeMToV(force);
@@ -124,13 +129,29 @@ void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::
     std::vector<double> a=this->DotInMAndV2(V, changedforce);
     for(int i = 0; i < a.size(); i++)
     {
-        a[i] /= abs(omega[i]);
+        if(omega[i]>0)
+        {
+            a[i] /= omega[i];
+        }
+        else if(omega[i]<0)
+        {
+           a[i] /= (-omega[i]);
+        }
+        
     }
 
     std::vector<double> tmpdpos = this->DotInMAndV1(V, a);
 
 
     dpos = this->ReshapeVToM(tmpdpos);
+    /*for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            std::cout<<dpos[i][j]<<' ';
+        }
+        std::cout<<std::endl;
+    }*/
     for(int i = 0; i < size; i++)
     {
         double k = 0;
@@ -176,7 +197,7 @@ void BFGS::Update(std::vector<double> pos, std::vector<double> force,std::vector
     H = this->MSubM(H, this->MPlus(this->OuterVAndV(dg, dg), b));
 }
 
-void BFGS::DetermineStep(std::vector<double> steplength,std::vector<std::vector<double>>& dpos,int maxstep)
+void BFGS::DetermineStep(std::vector<double> steplength,std::vector<std::vector<double>>& dpos,double maxstep)
 {
     auto maxsteplength = max_element(steplength.begin(), steplength.end());
     double a = *maxsteplength;
