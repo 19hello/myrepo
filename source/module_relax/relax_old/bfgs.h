@@ -6,9 +6,11 @@
 #include<algorithm>
 #include<cmath>
 #include"module_base/lapack_connector.h"
-#include "module_cell/unitcell.h"
+
 #include "module_base/matrix.h"
 #include "module_base/matrix3.h"
+#include "module_cell/unitcell.h"
+
 
 
 class BFGS
@@ -28,10 +30,10 @@ public:
     std::vector<std::vector<double>> pos;
     std::vector<std::vector<double>> dpos;
 
-    void init_relax(const int _size,UnitCell& ucell,double _maxstep);//initialize parameters
-    bool relax_step(ModuleBase::matrix _force,UnitCell& ucell);//
+    void allocate(const int _size);//initialize parameters
+    void relax_step(ModuleBase::matrix _force,UnitCell& ucell);//
     void PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength,std::vector<std::vector<double>>& dpos);
-    bool IsRestrain(std::vector<std::vector<double>>& dpos);
+    void IsRestrain(std::vector<std::vector<double>>& dpos);
 
 private:
     bool sign;

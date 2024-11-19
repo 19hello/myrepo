@@ -16,11 +16,11 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
     if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax" )
     {
-        if(PARAM.inp.relax_method == "bfgs_trad")
+        /*if(PARAM.inp.relax_method=="bfgs_trad")
         {
-            bfgs_trad.init_relax(GlobalC::ucell.nat,GlobalC::ucell,PARAM.inp.relax_bfgs_rmax);
+            bfgs_trad.allocate(GlobalC::ucell.nat);
         }
-        else if (!PARAM.inp.relax_new)
+        else*/ if (!PARAM.inp.relax_new)
         {
             rl_old.init_relax(GlobalC::ucell.nat);
         }
@@ -82,12 +82,12 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
             if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax")
             {
-                if(PARAM.inp.relax_method == "bfgs_trad")
+                /*if(PARAM.inp.relax_method == "bfgs_trad")
                 {   
                     stop=bfgs_trad.relax_step(force,GlobalC::ucell);
                 }
 
-                else if (PARAM.inp.relax_new)
+                else*/ if (PARAM.inp.relax_new)
                 {
                     stop = rl.relax_step(force, stress, this->etot);
                 }

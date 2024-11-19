@@ -2,11 +2,14 @@
 #include "module_hamilt_pw/hamilt_pwdft/global.h"
 #include "module_base/matrix3.h"
 #include "module_relax/relax_old/ions_move_basic.h"
+#include "module_parameter/parameter.h"
+#include "ions_move_basic.h"
 
-void BFGS::init_relax(const int _size,UnitCell& ucell,double _maxstep) // initialize H0、H、pos0、force0、force
+
+void BFGS::allocate(const int _size) // initialize H0、H、pos0、force0、force
 {
     alpha=70;//relax_scale_force
-    maxstep=_maxstep;
+    maxstep=PARAM.inp.relax_bfgs_rmax;
     if(maxstep==0)
     {
         maxstep=0.8;
@@ -23,13 +26,19 @@ void BFGS::init_relax(const int _size,UnitCell& ucell,double _maxstep) // initia
     force0 = std::vector<double>(3*size, 0.0);
     force = std::vector<std::vector<double>>(size, std::vector<double>(3, 0.0));
     steplength = std::vector<double>(size, 0.0);
-    this->GetPos(ucell,pos);
+    this->GetPos(GlobalC::ucell,pos);
+    
     
 }
 
-bool BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell) 
+void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell) 
 {
     std::cout<<"enter Step"<<std::endl;
+    if(sign)
+    {
+        
+    }
+    std::cout<<"enter Step1"<<std::endl;
     ucell.ionic_position_updated = true;
     for(int i = 0; i < _force.nr; i++)
     {
@@ -59,21 +68,21 @@ bool BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
     }*/
     this->UpdatePos(ucell);
     //std::cout<<"enter Step3"<<std::endl;
-    return this->IsRestrain(dpos);
+    this->IsRestrain(dpos);
 }
 
 void BFGS::GetPos(UnitCell& ucell,std::vector<std::vector<double>>& pos)
 {
     int k=0;
-    for(int i=0;i<GlobalC::ucell.ntype;i++)
+    for(int i=0;i<ucell.ntype;i++)
     {
-        for(int j=0;j<GlobalC::ucell.atoms[i].na;j++)
+        for(int j=0;j<ucell.atoms[i].na;j++)
         {
-            pos[k+j][0]=GlobalC::ucell.atoms[i].tau[j].x*ModuleBase::BOHR_TO_A*GlobalC::ucell.lat0;
-            pos[k+j][1]=GlobalC::ucell.atoms[i].tau[j].y*ModuleBase::BOHR_TO_A*GlobalC::ucell.lat0;
-            pos[k+j][2]=GlobalC::ucell.atoms[i].tau[j].z*ModuleBase::BOHR_TO_A*GlobalC::ucell.lat0; 
+            pos[k+j][0]=ucell.atoms[i].tau[j].x*ModuleBase::BOHR_TO_A*ucell.lat0;
+            pos[k+j][1]=ucell.atoms[i].tau[j].y*ModuleBase::BOHR_TO_A*ucell.lat0;
+            pos[k+j][2]=ucell.atoms[i].tau[j].z*ModuleBase::BOHR_TO_A*ucell.lat0; 
         }
-        k+=GlobalC::ucell.atoms[i].na;
+        k+=ucell.atoms[i].na;
     }
 }
 
@@ -86,14 +95,14 @@ void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::
     //std::cout<<"enter prepareStep1"<<std::endl;
     this->Update(changedpos, changedforce,H);
     //std::cout<<"enter prepareStep2"<<std::endl;
-    for(int i = 0; i < 3*size; i++)
+    /*for(int i = 0; i < 3*size; i++)
     {
         for(int j = 0; j < 3*size; j++)
         {
             std::cout<<H[i][j]<<' ';
         }
         std::cout<<std::endl;
-    }
+    }*/
     //call dysev
     //std::cout<<size<<std::endl;
     std::vector<double> omega(3*size);
@@ -226,20 +235,20 @@ void BFGS::UpdatePos(UnitCell& ucell)
 
         //convert unit
         ModuleBase::Vector3<double> move_ion_cart;
-        move_ion_cart.x = dpos[iat][0] / ModuleBase::BOHR_TO_A / GlobalC::ucell.lat0;
-        move_ion_cart.y = dpos[iat][1] / ModuleBase::BOHR_TO_A / GlobalC::ucell.lat0;
-        move_ion_cart.z = dpos[iat][2] / ModuleBase::BOHR_TO_A / GlobalC::ucell.lat0;
+        move_ion_cart.x = dpos[iat][0] / ModuleBase::BOHR_TO_A / ucell.lat0;
+        move_ion_cart.y = dpos[iat][1] / ModuleBase::BOHR_TO_A / ucell.lat0;
+        move_ion_cart.z = dpos[iat][2] / ModuleBase::BOHR_TO_A / ucell.lat0;
 
         //convert to Direct coordinate
         //note here the old GT is used
 
         //convert pos
-        ModuleBase::Vector3<double> move_ion_dr = move_ion_cart * GlobalC::ucell.GT;
+        ModuleBase::Vector3<double> move_ion_dr = move_ion_cart * ucell.GT;
 
 
-        int it = GlobalC::ucell.iat2it[iat];
-        int ia = GlobalC::ucell.iat2ia[iat];
-        Atom* atom = &GlobalC::ucell.atoms[it];
+        int it = ucell.iat2it[iat];
+        int ia = ucell.iat2ia[iat];
+        Atom* atom = &ucell.atoms[it];
 
         if(atom->mbl[ia].x == 1)
         {
@@ -254,11 +263,11 @@ void BFGS::UpdatePos(UnitCell& ucell)
             move_ion[iat * 3 + 2] = move_ion_dr.z ;
         }
     }
-	GlobalC::ucell.update_pos_taud(move_ion);
+	ucell.update_pos_taud(move_ion);
     pos = this->MAddM(pos, dpos);
 }
 
-bool BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
+void BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
 {
     double a=0;
     for(int i=0;i<size;i++)
@@ -281,7 +290,7 @@ bool BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
         }
     }
     std::cout<<a<<std::endl;
-    return a<0.00001;
+    Ions_Move_Basic::converged = a<0.00001;
 }
 // matrix methods
 

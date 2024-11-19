@@ -6,8 +6,8 @@ add_library(
 
     relax_new/relax.cpp
     relax_new/line_search.cpp
-    relax_new/bfgs.cpp
-
+    
+    relax_old/bfgs.cpp
     relax_old/relax_old.cpp
     relax_old/bfgs_basic.cpp
     relax_old/ions_move_basic.cpp

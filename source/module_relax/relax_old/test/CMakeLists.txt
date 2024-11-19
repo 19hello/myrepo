@@ -29,11 +29,7 @@ AddTest(
   SOURCES bfgs_basic_test.cpp ../bfgs_basic.cpp
 )
 
-AddTest(
-  TARGET ions_move_methods_test
-  LIBS parameter ${math_libs} base device 
-  SOURCES ions_move_methods_test.cpp ../ions_move_methods.cpp ../ions_move_basic.cpp ../ions_move_bfgs.cpp ../ions_move_cg.cpp ../ions_move_sd.cpp ../bfgs_basic.cpp
-)
+
 
 AddTest(
   TARGET ions_move_basic_test
