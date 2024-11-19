@@ -255,7 +255,7 @@ OBJS_ESOLVER_LCAO=esolver_ks_lcao.o\
       dpks_cal_e_delta_band.o\
       set_matrix_grid.o\
       lcao_before_scf.o\
-      lcao_gets.o\
+      esolver_gets.o\
       lcao_others.o\
       lcao_init_after_vc.o\
 
@@ -685,7 +685,9 @@ OBJS_VDW=vdw.o\
     vdwd3_parameters.o\
     vdwd2.o\
     vdwd3.o\
-    vdwd3_parameters_tab.o
+    vdwd3_parameters_tab.o\
+    vdwd3_autoset_xcname.o\
+    vdwd3_autoset_xcparam.o
 
 OBJS_DFTU=dftu.o\
       dftu_force.o\
