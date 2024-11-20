@@ -34,8 +34,7 @@ void Ions_Move_Methods::allocate(const int &natom)
     }
     else if(Ions_Move_Basic::relax_method == "bfgs_trad")
     {
-        this->bfgs_trad.allocate(natom);
-        
+        this->bfgs_trad.allocate(natom);       
     }
     else
     {
@@ -77,8 +76,7 @@ void Ions_Move_Methods::cal_movement(const int &istep,
     }
     else if(Ions_Move_Basic::relax_method == "bfgs_trad")
     {
-        bfgs_trad.relax_step(f,ucell);
-        
+        bfgs_trad.relax_step(f,ucell);        
     }
     else
     {
