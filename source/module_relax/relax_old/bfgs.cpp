@@ -33,14 +33,9 @@ void BFGS::allocate(const int _size) // initialize H0、H、pos0、force0、forc
 
 void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell) 
 {
-    std::cout<<"enter Step"<<std::endl;
-    if(sign)
-    {
-        
-    }
-    std::cout<<"enter Step1"<<std::endl;
+    //std::cout<<"enter Step"<<std::endl;
     ucell.ionic_position_updated = true;
-    for(int i = 0; i < _force.nr; i++)
+    /*for(int i = 0; i < _force.nr; i++)
     {
 
         for(int j=0;j<_force.nc;j++)
@@ -49,7 +44,7 @@ void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
             std::cout<<force[i][j]<<' ';
         }
         std::cout<<std::endl;
-    }
+    }*/
     //std::cout<<"enter Step0"<<std::endl;
     //std::cout<<size<<std::endl;
     //GetPos(ucell);
@@ -57,7 +52,7 @@ void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
     //std::cout<<"enter Step1"<<std::endl;
     this->DetermineStep(steplength,dpos,maxstep);
 
-    std::cout<<"enter Step2"<<std::endl;
+    //std::cout<<"enter Step2"<<std::endl;
     /*for(int i=0;i<size;i++)
     {
         for(int j=0;j<3;j++)
@@ -289,7 +284,7 @@ void BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
             }
         }
     }
-    std::cout<<a<<std::endl;
+    //std::cout<<a<<std::endl;
     Ions_Move_Basic::converged = a<0.00001;
 }
 // matrix methods

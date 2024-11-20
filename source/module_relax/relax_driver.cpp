@@ -16,11 +16,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
     if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax" )
     {
-        /*if(PARAM.inp.relax_method=="bfgs_trad")
-        {
-            bfgs_trad.allocate(GlobalC::ucell.nat);
-        }
-        else*/ if (!PARAM.inp.relax_new)
+        if (!PARAM.inp.relax_new)
         {
             rl_old.init_relax(GlobalC::ucell.nat);
         }
@@ -30,7 +26,6 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
         }
     }
     
-
     this->istep = 1;
     int force_step = 1; // pengfei Li 2018-05-14
     int stress_step = 1;
@@ -82,12 +77,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
 
             if (PARAM.inp.calculation == "relax" || PARAM.inp.calculation == "cell-relax")
             {
-                /*if(PARAM.inp.relax_method == "bfgs_trad")
-                {   
-                    stop=bfgs_trad.relax_step(force,GlobalC::ucell);
-                }
-
-                else*/ if (PARAM.inp.relax_new)
+                if (PARAM.inp.relax_new)
                 {
                     stop = rl.relax_step(force, stress, this->etot);
                 }
@@ -100,9 +90,7 @@ void Relax_Driver::relax_driver(ModuleESolver::ESolver* p_esolver)
                                              stress,
                                              force_step,
                                              stress_step); // pengfei Li 2018-05-14
-                }
-                
-                
+                }         
                 // print structure
                 // changelog 20240509
                 // because I move out the dependence on GlobalV from UnitCell::print_stru_file
