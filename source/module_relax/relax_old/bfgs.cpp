@@ -35,16 +35,16 @@ void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
 {
     //std::cout<<"enter Step"<<std::endl;
     ucell.ionic_position_updated = true;
-    /*for(int i = 0; i < _force.nr; i++)
+    for(int i = 0; i < _force.nr; i++)
     {
 
         for(int j=0;j<_force.nc;j++)
         {
             force[i][j]=_force(i,j)*ModuleBase::Ry_to_eV/ModuleBase::BOHR_TO_A;
-            std::cout<<force[i][j]<<' ';
+            //std::cout<<force[i][j]<<' ';
         }
-        std::cout<<std::endl;
-    }*/
+        //std::cout<<std::endl;
+    }
     //std::cout<<"enter Step0"<<std::endl;
     //std::cout<<size<<std::endl;
     //GetPos(ucell);
