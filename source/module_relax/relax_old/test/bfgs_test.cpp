@@ -1,55 +1,93 @@
-/*#include <gtest/gtest.h>
-#include "../bfgs.h"
-#include "module_hamilt_pw/hamilt_pwdft/global.h"
-#include "module_base/matrix3.h"
-#include "module_base/vector3.h"
+#include <gtest/gtest.h>
+#include "for_test.h"
+#include "module_relax/relax_old/bfgs.h"
+#include "module_cell/unitcell.h"
+#include "module_base/matrix.h"
+#include "module_relax/relax_old/ions_move_basic.h"
 
-TEST(BFGSTest, InitializeTest) {
-    BFGS optimizer;
+
+TEST(BFGSTest, AllocateTest) {
+    BFGS bfgs;
     int size = 5;
-    optimizer.init_relax(size);
+    bfgs.allocate(size);
 
-    EXPECT_EQ(optimizer.size, size);
-    EXPECT_EQ(optimizer.alpha, 70);
-    EXPECT_EQ(optimizer.maxstep, 100);
-    for (int i = 0; i < 3 * size; ++i) {
-        EXPECT_DOUBLE_EQ(optimizer.H[i][i], 70.0);
+
+    EXPECT_EQ(bfgs.steplength.size(), size);
+    EXPECT_EQ(bfgs.force0.size(), size);
+    EXPECT_EQ(bfgs.H.size(), size);
+    for (const auto& row : bfgs.H) {
+        EXPECT_EQ(row.size(), size);
     }
 }
 
 
-
-
-// test PrepareStep 
-TEST(BFGSTest, PrepareStepTest) {
-    BFGS optimizer;
+TEST(BFGSTest, RelaxStepTest) {
+    BFGS bfgs;
+    UnitCell ucell;
+    ModuleBase::matrix force(3, 3,true);  
     int size = 3;
-    optimizer.init_relax(size);
 
-    std::vector<std::vector<double>> test_pos(size, std::vector<double>(3, 0.0));
-    std::vector<std::vector<double>> test_force(size, std::vector<double>(3, 0.5));
+    bfgs.allocate(size);
 
-    optimizer.pos = test_pos;
-    optimizer.force = test_force;
-    optimizer.PrepareStep();
-    for (const auto& row : optimizer.dpos) {
-        for (const auto& elem : row) {
-            EXPECT_NE(elem, 0.0);
-        }
-    }
+    force(0, 0)=0.1;
+    force(1, 1)=0.2;
+    force(2, 2)=0.3;
+
+    ASSERT_NO_THROW(bfgs.relax_step(force, ucell));  
+
+
+    EXPECT_EQ(bfgs.pos.size(), size);
 }
 
-// test IsRestrain 
-TEST(BFGSTest, IsRestrainTest) {
-    BFGS optimizer;
+/*TEST(BFGSTest, PrepareStepIntegrationTest) {
+    BFGS bfgs;
     int size = 3;
-    optimizer.init_relax(size);
+    bfgs.allocate(size);
 
-    optimizer.dpos = {{1e-8, 1e-8, 1e-8}, {1e-8, 1e-8, 1e-8}, {1e-8, 1e-8, 1e-8}};
-    EXPECT_TRUE(optimizer.IsRestrain());
+    std::vector<std::vector<double>> force = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+    std::vector<std::vector<double>> pos = {{0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}, {2.0, 2.0, 2.0}};
+    std::vector<std::vector<double>> H = {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
+    std::vector<double> pos0(size, 0.0);
+    std::vector<double> force0(size, 0.0);
+    std::vector<double> steplength(size, 0.0);
+    std::vector<std::vector<double>> dpos(size, std::vector<double>(size, 0.0));
 
-    optimizer.dpos = {{0.001, 0.001, 0.001}, {0.001, 0.001, 0.001}, {0.001, 0.001, 0.001}};
-    EXPECT_FALSE(optimizer.IsRestrain());
+    bfgs.PrepareStep(force, pos, H, pos0, force0, steplength, dpos);
+
+    for (double step : steplength) {
+        EXPECT_GT(step, 0.0);
+    }
 }*/
 
+TEST(BFGSTest, IsRestrainTest) {
+    BFGS bfgs;
+    int size = 3;
+    bfgs.allocate(size);
 
+    std::vector<std::vector<double>> dpos = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
+    bfgs.IsRestrain(dpos);
+
+    for (const auto& row : dpos) 
+    { 
+        for (double val : row) 
+        { 
+            EXPECT_LE(val, bfgs.maxstep); 
+        } 
+    } 
+} 
+TEST(BFGSTest, FullStepTest) 
+{ 
+    BFGS bfgs; 
+    UnitCell ucell; 
+    ModuleBase::matrix force(3, 3); 
+    int size = 3; 
+    bfgs.allocate(size);  
+    force(0, 0)=-0.5; 
+    force(1, 1)=-0.3; 
+    force(2, 2)=0.1; 
+    ASSERT_NO_THROW({ 
+        bfgs.relax_step(force, ucell); 
+        }); 
+    EXPECT_EQ(bfgs.force.size(), size); 
+    EXPECT_EQ(bfgs.pos.size(), size); 
+}

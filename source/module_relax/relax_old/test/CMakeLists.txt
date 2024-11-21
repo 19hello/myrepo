@@ -26,10 +26,15 @@ AddTest(
 AddTest(
   TARGET bfgs_basic_test
   LIBS parameter ${math_libs} base device 
-  SOURCES bfgs_basic_test.cpp ../bfgs_basic.cpp
+  SOURCES bfgs_basic_test.cpp ../bfgs_basic.cpp 
 )
 
 
+AddTest(
+  TARGET bfgs_test
+  LIBS parameter ${math_libs} base device 
+  SOURCES bfgs_test.cpp ../bfgs.cpp ../ions_move_basic.cpp
+)
 
 AddTest(
   TARGET ions_move_basic_test
