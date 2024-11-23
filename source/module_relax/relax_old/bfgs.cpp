@@ -61,8 +61,9 @@ void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
     }*/
 
     this->UpdatePos(ucell);
-    this->IsRestrain(dpos);
     this->CalculateLargestGrad(_force,ucell);
+    this->IsRestrain(dpos);
+    
     
 }
 void BFGS::GetPos(UnitCell& ucell,std::vector<std::vector<double>>& pos)
@@ -360,7 +361,7 @@ void BFGS::UpdatePos(UnitCell& ucell)
 
 void BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
 {
-    double a=0;
+    /*double a=0;
     for(int i=0;i<size;i++)
     {
         for(int j=0;j<3;j++)
@@ -383,6 +384,9 @@ void BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
     std::cout<<"max dpos"<<std::endl;
     std::cout<<a<<std::endl;
     Ions_Move_Basic::converged = a<0.00001;
+    std::cout<<Ions_Move_Basic::largest_grad * ModuleBase::Ry_to_eV / 0.529177<<std::endl;
+    std::cout<<PARAM.inp.force_thr_ev<<std::endl;*/
+    Ions_Move_Basic::converged = Ions_Move_Basic::largest_grad * ModuleBase::Ry_to_eV / 0.529177<PARAM.inp.force_thr_ev;
 }
 
 void BFGS::CalculateLargestGrad(ModuleBase::matrix _force,UnitCell& ucell)
