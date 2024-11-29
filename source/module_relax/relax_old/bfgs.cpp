@@ -4,18 +4,10 @@
 #include "module_parameter/parameter.h"
 #include "ions_move_basic.h"
 
-
-
-
-
 void BFGS::allocate(const int _size) // initialize H0、H、pos0、force0、force
 {
-    alpha=70;//relax_scale_force
+    alpha=70;
     maxstep=PARAM.inp.relax_bfgs_rmax;
-    if(maxstep==0)
-    {
-        maxstep=0.8;
-    } 
     size=_size;
     sign =true;
     H = std::vector<std::vector<double>>(3*size, std::vector<double>(3*size, 0.0));
@@ -31,26 +23,51 @@ void BFGS::allocate(const int _size) // initialize H0、H、pos0、force0、forc
     force = std::vector<std::vector<double>>(size, std::vector<double>(3, 0.0));
     steplength = std::vector<double>(size, 0.0);  
 }
+
 void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell) 
 {
-    //std::cout<<"enter Step"<<std::endl;
-    GetPos(ucell,pos);
+    GetPos(ucell,pos);  
     GetPostaud(ucell,pos_taud);
     ucell.ionic_position_updated = true;
     for(int i = 0; i < _force.nr; i++)
     {
-
         for(int j=0;j<_force.nc;j++)
         {
             force[i][j]=_force(i,j)*ModuleBase::Ry_to_eV/ModuleBase::BOHR_TO_A;
-            //std::cout<<force[i][j]<<' ';
         }
-        //std::cout<<std::endl;
+    }
+    int k=0;
+    for(int i=0;i<ucell.ntype;i++)
+    {
+        for(int j=0;j<ucell.atoms[i].na;j++)
+        {
+            if(ucell.atoms[i].mbl[j].x==0)
+            {
+                force[k+j][0]=0;
+            }
+            if(ucell.atoms[i].mbl[j].y==0)
+            {
+                force[k+j][1]=0;
+            }
+            if(ucell.atoms[i].mbl[j].z==0)
+            {
+                force[k+j][2]=0;
+            }
+        }
+        k+=ucell.atoms[i].na;
     }
     this->PrepareStep(force,pos,H,pos0,force0,steplength,dpos,ucell);
     this->DetermineStep(steplength,dpos,maxstep);
-
-    /*std::cout<<"dpos"<<std::endl;
+    /*std::cout<<"force"<<std::endl;
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            std::cout<<force[i][j]<<' ';
+        }
+        std::cout<<std::endl;
+    }
+    std::cout<<"dpos"<<std::endl;
     for(int i=0;i<size;i++)
     {
         for(int j=0;j<3;j++)
@@ -58,14 +75,21 @@ void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell)
             std::cout<<dpos[i][j]<<' ';
         }
         std::cout<<std::endl;
+    }
+    std::cout<<"pos"<<std::endl;
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            std::cout<<pos[i][j]<<' ';
+        }
+        std::cout<<std::endl;
     }*/
-
     this->UpdatePos(ucell);
     this->CalculateLargestGrad(_force,ucell);
-    this->IsRestrain(dpos);
-    
-    
+    this->IsRestrain(dpos);  
 }
+
 void BFGS::GetPos(UnitCell& ucell,std::vector<std::vector<double>>& pos)
 {
     int k=0;
@@ -96,26 +120,23 @@ void BFGS::GetPostaud(UnitCell& ucell,std::vector<std::vector<double>>& pos_taud
     }
 }
 
-
-void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength,std::vector<std::vector<double>>& dpos,UnitCell& ucell)
+void BFGS::PrepareStep(std::vector<std::vector<double>>& force,
+std::vector<std::vector<double>>& pos,
+std::vector<std::vector<double>>& H,
+std::vector<double>& pos0,
+std::vector<double>& force0,
+std::vector<double>& steplength,
+std::vector<std::vector<double>>& dpos,
+UnitCell& ucell)
 {
     std::vector<double> changedforce = this->ReshapeMToV(force);
     std::vector<double> changedpos = this->ReshapeMToV(pos);
     this->Update(changedpos, changedforce,H,ucell);
-    /*for(int i = 0; i < 3*size; i++)
-    {
-        for(int j = 0; j < 3*size; j++)
-        {
-            std::cout<<H[i][j]<<' ';
-        }
-        std::cout<<std::endl;
-    }*/
-
     //call dysev
     std::vector<double> omega(3*size);
     std::vector<double> work(3*size*3*size);
     int lwork=3*size*3*size;
-    int info;
+    int info=0;
     std::vector<double> H_flat;
     for(const auto& row : H)
     {
@@ -132,28 +153,22 @@ void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::
             V[j][i] = H_flat[3*size*i + j];
         }
     }
-    
-    /*for(int i=0;i<3*size;i++)
-    {
-        std::cout<<omega[i]<<' ';
-    }
-    std::cout<<std::endl;*/
-
     std::vector<double> a=this->DotInMAndV2(V, changedforce);
     for(int i = 0; i < a.size(); i++)
     {
-        a[i]/=std::abs(omega[i]);
-        /*if(omega[i]>0)
-        {
-            a[i] /= omega[i];
-        }
-        else if(omega[i]<0)
-        {
-           a[i] /= (-omega[i]);
-        }*/      
+        a[i]/=std::abs(omega[i]);    
     }
     std::vector<double> tmpdpos = this->DotInMAndV1(V, a);
     dpos = this->ReshapeVToM(tmpdpos);
+    /*std::cout<<"dpos0"<<std::endl;
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            std::cout<<dpos[i][j]<<' ';
+        }
+        std::cout<<std::endl;
+    }*/
     for(int i = 0; i < size; i++)
     {
         double k = 0;
@@ -168,13 +183,14 @@ void BFGS::PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::
     force0 = this->ReshapeMToV(force);
 }
 
-void BFGS::Update(std::vector<double> pos, std::vector<double> force,std::vector<std::vector<double>>& H,UnitCell& ucell)
+void BFGS::Update(std::vector<double>& pos, std::vector<double>& force,std::vector<std::vector<double>>& H,UnitCell& ucell)
 {
     if(sign)
     {
         sign=false;
         return;
     }
+    //std::vector<double> dpos=this->VSubV(pos,pos0);
     std::vector<double> dpos = this->VSubV(ReshapeMToV(pos_taud), pos_taud0);
     for(int i=0;i<3*size;i++)
     {
@@ -203,19 +219,12 @@ void BFGS::Update(std::vector<double> pos, std::vector<double> force,std::vector
         move_ion_cart.x = c[iat][0] *ModuleBase::BOHR_TO_A * ucell.lat0;
         move_ion_cart.y = c[iat][1] * ModuleBase::BOHR_TO_A * ucell.lat0;
         move_ion_cart.z = c[iat][2] * ModuleBase::BOHR_TO_A * ucell.lat0;
-        /*std::cout<<"moveioncart"<<std::endl;
-        std::cout<<move_ion_cart.x<<' ';
-        std::cout<<move_ion_cart.y<<' ';
-        std::cout<<move_ion_cart.z<<' ';
-        std::cout<<std::endl;*/
-
 
         //convert pos
         ModuleBase::Vector3<double> move_ion_dr = move_ion_cart* ucell.latvec;
         int it = ucell.iat2it[iat];
         int ia = ucell.iat2ia[iat];
         Atom* atom = &ucell.atoms[it];
-
         if(atom->mbl[ia].x == 1)
         {
             dpos[iat * 3] = move_ion_dr.x;
@@ -229,6 +238,18 @@ void BFGS::Update(std::vector<double> pos, std::vector<double> force,std::vector
             dpos[iat * 3 + 2] = move_ion_dr.z ;
         }
     }
+    /*std::cout<<"Printpos"<<std::endl;
+    for(int i=0;i<3*size;i++)
+    {
+        std::cout<<pos[i]<<' ';
+    }
+    std::cout<<std::endl;
+    std::cout<<"Printpos0"<<std::endl;
+    for(int i=0;i<3*size;i++)
+    {
+        std::cout<<pos0[i]<<' ';
+    }
+    std::cout<<std::endl;*/
     /*std::cout<<"PrintDpos"<<std::endl;
     for(int i=0;i<3*size;i++)
     {
@@ -243,6 +264,10 @@ void BFGS::Update(std::vector<double> pos, std::vector<double> force,std::vector
     double a = this->DotInVAndV(dpos, dforce);
     std::vector<double> dg = this->DotInMAndV1(H, dpos);
     double b = this->DotInVAndV(dpos, dg);
+    /*std::cout<<"a"<<std::endl;
+    std::cout<<a<<std::endl;
+    std::cout<<"b"<<std::endl;
+    std::cout<<b<<std::endl;*/
     H = this->MSubM(H, this->MPlus(this->OuterVAndV(dforce, dforce), a));
     H = this->MSubM(H, this->MPlus(this->OuterVAndV(dg, dg), b));
 }
@@ -251,6 +276,10 @@ void BFGS::DetermineStep(std::vector<double> steplength,std::vector<std::vector<
 {
     auto maxsteplength = max_element(steplength.begin(), steplength.end());
     double a = *maxsteplength;
+    /*std::cout<<"maxstep"<<std::endl;
+    std::cout<<maxstep<<std::endl;
+    std::cout<<"maxsteplength"<<std::endl;
+    std::cout<<a<<std::endl;*/
     if(a >= maxstep)
     {
         double scale = maxstep / a;
@@ -275,8 +304,9 @@ void BFGS::UpdatePos(UnitCell& ucell)
             a[i*3+j]/=ModuleBase::BOHR_TO_A;
         }
     }
+    std::cout<<std::endl;
+    int k=0;
     ucell.update_pos_tau(a);
-
     /*double move_ion[3*size];
     ModuleBase::zeros(move_ion, size*3);
 
@@ -290,11 +320,6 @@ void BFGS::UpdatePos(UnitCell& ucell)
         move_ion_cart.x = dpos[iat][0] / ModuleBase::BOHR_TO_A / ucell.lat0;
         move_ion_cart.y = dpos[iat][1] / ModuleBase::BOHR_TO_A / ucell.lat0;
         move_ion_cart.z = dpos[iat][2] / ModuleBase::BOHR_TO_A / ucell.lat0;
-        std::cout<<"moveioncart"<<std::endl;
-        std::cout<<move_ion_cart.x<<' ';
-        std::cout<<move_ion_cart.y<<' ';
-        std::cout<<move_ion_cart.z<<' ';
-        std::cout<<std::endl;
 
         //convert to Direct coordinate
         //note here the old GT is used
@@ -320,76 +345,16 @@ void BFGS::UpdatePos(UnitCell& ucell)
             move_ion[iat * 3 + 2] = move_ion_dr.z ;
         }
     }
-    std::cout<<"move_ion_dr"<<std::endl;
-    for(int i=0;i<3*size;i++)
-    {
-        std::cout<<move_ion[i]<<' ';
-    }
-    std::cout<<std::endl;
-    std::cout<<"printtau"<<std::endl;
-    for(int i=0;i<ucell.ntype;i++)
-    {
-        for(int j=0;j<ucell.atoms[i].na;j++)
-        {
-            std::cout<<ucell.atoms[i].tau[j].x<<' ';
-            std::cout<<ucell.atoms[i].tau[j].y<<' ';
-            std::cout<<ucell.atoms[i].tau[j].z<<' ';
-            std::cout<<ucell.atoms[i].taud[j].x<<' ';
-            std::cout<<ucell.atoms[i].taud[j].y<<' ';
-            std::cout<<ucell.atoms[i].taud[j].z<<' ';
-        }
-        std::cout<<std::endl;
-    }
-	//ucell.update_pos_taud(move_ion);
-    
-    std::cout<<"printtau"<<std::endl;
-    for(int i=0;i<ucell.ntype;i++)
-    {
-        for(int j=0;j<ucell.atoms[i].na;j++)
-        {
-            std::cout<<ucell.atoms[i].tau[j].x<<' ';
-            std::cout<<ucell.atoms[i].tau[j].y<<' ';
-            std::cout<<ucell.atoms[i].tau[j].z<<' ';
-            std::cout<<ucell.atoms[i].taud[j].x<<' ';
-            std::cout<<ucell.atoms[i].taud[j].y<<' ';
-            std::cout<<ucell.atoms[i].taud[j].z<<' ';
-        }
-        std::cout<<std::endl;
-    }
-    //pos = this->MAddM(pos, dpos);*/
+	ucell.update_pos_taud(move_ion);
+    pos = this->MAddM(pos, dpos);*/
 }
 
 void BFGS::IsRestrain(std::vector<std::vector<double>>& dpos)
 {
-    /*double a=0;
-    for(int i=0;i<size;i++)
-    {
-        for(int j=0;j<3;j++)
-        {
-            double w;
-            if(dpos[i][j]>0)
-            {
-                w=dpos[i][j];
-            }
-            else
-            {
-                w=-dpos[i][j];
-            }
-            if(w>a)
-            {
-                a=w;
-            }
-        }
-    }
-    std::cout<<"max dpos"<<std::endl;
-    std::cout<<a<<std::endl;
-    Ions_Move_Basic::converged = a<0.00001;
-    std::cout<<Ions_Move_Basic::largest_grad * ModuleBase::Ry_to_eV / 0.529177<<std::endl;
-    std::cout<<PARAM.inp.force_thr_ev<<std::endl;*/
     Ions_Move_Basic::converged = Ions_Move_Basic::largest_grad * ModuleBase::Ry_to_eV / 0.529177<PARAM.inp.force_thr_ev;
 }
 
-void BFGS::CalculateLargestGrad(ModuleBase::matrix _force,UnitCell& ucell)
+void BFGS::CalculateLargestGrad(ModuleBase::matrix& _force,UnitCell& ucell)
 {
     std::vector<double> grad= std::vector<double>(3*size, 0.0);
     int iat = 0;
@@ -419,16 +384,14 @@ void BFGS::CalculateLargestGrad(ModuleBase::matrix _force,UnitCell& ucell)
     Ions_Move_Basic::largest_grad /= ucell.lat0;
     if (PARAM.inp.out_level == "ie")
     {
-        std::cout << " LARGEST GRAD (eV/A)  : " << Ions_Move_Basic::largest_grad * ModuleBase::Ry_to_eV / 0.529177
+        std::cout << " LARGEST GRAD (eV/A)  : " << Ions_Move_Basic::largest_grad * ModuleBase::Ry_to_eV / 0.5291772109
                   << std::endl;
     }
 
 }
-
-
 // matrix methods
 
-std::vector<double> BFGS::ReshapeMToV(std::vector<std::vector<double>> matrix) 
+std::vector<double> BFGS::ReshapeMToV(std::vector<std::vector<double>>& matrix) 
 {
     int size = matrix.size();
     std::vector<double> result;
@@ -439,7 +402,7 @@ std::vector<double> BFGS::ReshapeMToV(std::vector<std::vector<double>> matrix)
     return result;
 }
 
-std::vector<std::vector<double>> BFGS::MAddM(std::vector<std::vector<double>> a, std::vector<std::vector<double>> b) 
+std::vector<std::vector<double>> BFGS::MAddM(std::vector<std::vector<double>>& a, std::vector<std::vector<double>>& b) 
 {
     std::vector<std::vector<double>> result = std::vector<std::vector<double>>(a.size(), std::vector<double>(a[0].size(), 0.0));
     for(int i = 0; i < a.size(); i++)
