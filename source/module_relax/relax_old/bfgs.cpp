@@ -24,7 +24,7 @@ void BFGS::allocate(const int _size) // initialize H0、H、pos0、force0、forc
     steplength = std::vector<double>(size, 0.0);  
 }
 
-void BFGS::relax_step(ModuleBase::matrix _force,UnitCell& ucell) 
+void BFGS::relax_step(ModuleBase::matrix& _force,UnitCell& ucell) 
 {
     GetPos(ucell,pos);  
     GetPostaud(ucell,pos_taud);

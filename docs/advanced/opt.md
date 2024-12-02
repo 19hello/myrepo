@@ -24,6 +24,10 @@ The [BFGS method](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%9
 
 In ABACUS, we implemented the BFGS method for doing fixed-cell structural relaxation.
 
+### BFGS_TRAD method
+
+The BFGS_TRAD method is an algorithm implemented in ABACUS, referencing the BFGS method from ASE. The previous BFGS method in Abacus did not perform well for some tests and the updated BFGS_TRAD method now produces results that are consistent with the BFGS method in ASE. In cases where the previous BFGS method could not converge within a limited number of steps, the BFGS_TRAD method can successfully converge. 
+
 ### SD method
 
 The [SD (steepest descent) method](https://en.wikipedia.org/wiki/Gradient_descent) is one of the simplest first-order optimization methods, where in each step the motion is along the direction of the gradient, where the function descents the fastest.
