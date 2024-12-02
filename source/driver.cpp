@@ -19,9 +19,6 @@ Driver::Driver()
 
 Driver::~Driver()
 {
-    // Release the device memory within singleton object GlobalC::ppcell
-    // before the main function exits.
-    GlobalC::ppcell.release_memory();
 }
 
 void Driver::init()
@@ -183,7 +180,7 @@ void Driver::atomic_world()
     //--------------------------------------------------
 
     // where the actual stuff is done
-    this->driver_run();
+    this->driver_run(GlobalC::ucell);
 
     ModuleBase::timer::finish(GlobalV::ofs_running);
     ModuleBase::Memory::print_all(GlobalV::ofs_running);

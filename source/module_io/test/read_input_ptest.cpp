@@ -415,11 +415,13 @@ TEST_F(InputParaTest, ParaRead)
     EXPECT_EQ(param.inp.sc_scf_nmin, 4);
     EXPECT_DOUBLE_EQ(param.inp.alpha_trial, 0.02);
     EXPECT_DOUBLE_EQ(param.inp.sccut, 4.0);
-    EXPECT_EQ(param.inp.sc_file, "sc.json");
+    EXPECT_EQ(param.inp.sc_scf_thr, 1e-3);
+    EXPECT_EQ(param.inp.sc_drop_thr, 1e-3);
     EXPECT_EQ(param.inp.lr_nstates, 1);
     EXPECT_EQ(param.inp.nocc, param.inp.nbands);
     EXPECT_EQ(param.inp.nvirt, 1);
     EXPECT_EQ(param.inp.xc_kernel, "LDA");
+    EXPECT_EQ(param.inp.lr_init_xc_kernel[0], "default");
     EXPECT_EQ(param.inp.lr_solver, "dav");
     EXPECT_DOUBLE_EQ(param.inp.lr_thr, 1e-2);
     EXPECT_FALSE(param.inp.lr_unrestricted);
@@ -427,6 +429,8 @@ TEST_F(InputParaTest, ParaRead)
     EXPECT_EQ(param.inp.abs_wavelen_range.size(), 2);
     EXPECT_DOUBLE_EQ(param.inp.abs_wavelen_range[0], 0.0);
     EXPECT_DOUBLE_EQ(param.inp.abs_broadening, 0.01);
+    EXPECT_EQ(param.inp.rdmft, 0);
+    EXPECT_DOUBLE_EQ(param.inp.rdmft_power_alpha, 0.656);
 }
 
 TEST_F(InputParaTest, Check)

@@ -31,12 +31,12 @@ list(APPEND objects
     fp_energy.cpp
     magnetism.cpp
     occupy.cpp
+    cal_ux.cpp
 )
 
 if(ENABLE_LCAO)
   list(APPEND objects
       elecstate_lcao.cpp
-      elecstate_lcao_tddft.cpp
       elecstate_lcao_cal_tau.cpp
       potentials/H_TDDFT_pw.cpp
       module_dm/density_matrix.cpp

@@ -74,6 +74,7 @@ VPATH=./src_global:\
 ./module_lr/operator_casida:\
 ./module_lr/potentials:\
 ./module_lr/utils:\
+./module_rdmft:\
 ./\
 
 OBJS_ABACUS_PW=${OBJS_MAIN}\
@@ -115,6 +116,7 @@ ${OBJS_DELTASPIN}\
 ${OBJS_TENSOR}\
 ${OBJS_HSOLVER_PEXSI}\
 ${OBJS_LR}\
+${OBJS_RDMFT}
 
 OBJS_MAIN=main.o\
     driver.o\
@@ -226,9 +228,9 @@ OBJS_ELECSTAT=elecstate.o\
     H_Hartree_pw.o\
     H_TDDFT_pw.o\
     pot_xc.o\
+    cal_ux.o\
 
 OBJS_ELECSTAT_LCAO=elecstate_lcao.o\
-      elecstate_lcao_tddft.o\
       elecstate_lcao_cal_tau.o\
       density_matrix.o\
       density_matrix_io.o\
@@ -246,18 +248,13 @@ OBJS_ESOLVER=esolver.o\
     esolver_of.o\
     esolver_of_tool.o\
     esolver_of_interface.o\
-    pw_init_after_vc.o\
-    pw_init_globalc.o\
     pw_others.o\
 
 OBJS_ESOLVER_LCAO=esolver_ks_lcao.o\
       esolver_ks_lcao_tddft.o\
-      dpks_cal_e_delta_band.o\
-      set_matrix_grid.o\
       lcao_before_scf.o\
       esolver_gets.o\
       lcao_others.o\
-      lcao_init_after_vc.o\
 
 OBJS_GINT=gint.o\
       gint_gamma_env.o\
@@ -318,7 +315,7 @@ OBJS_HAMILT_LCAO=hamilt_lcao.o\
     op_dftu_lcao.o\
     deepks_lcao.o\
     op_exx_lcao.o\
-    sc_lambda_lcao.o\
+    dspin_lcao.o\
     dftu_lcao.o\
 
 OBJS_HCONTAINER=base_matrix.o\
@@ -407,9 +404,7 @@ OBJS_PSI_INITIALIZER=psi_initializer.o\
                      psi_initializer_nao.o\
                      psi_initializer_nao_random.o\
 
-OBJS_PW=fft.o\
-    fft_bundle.o\
-    fft_base.o\
+OBJS_PW=fft_bundle.o\
     fft_cpu.o\
     pw_basis.o\
     pw_basis_k.o\
@@ -445,7 +440,6 @@ OBJS_SURCHEM=surchem.o\
     cal_totn.o\
     cal_vcav.o\
     cal_vel.o\
-    corrected_energy.o\
     minimize_cg.o\
     sol_force.o\
 
@@ -674,7 +668,7 @@ OBJS_SRCPW=H_Ewald_pw.o\
     symmetry_rhog.o\
     wavefunc.o\
     wf_atomic.o\
-    wfinit.o\
+    psi_init.o\
     elecond.o\
     sto_tool.o\
     sto_elecond.o\
@@ -699,14 +693,11 @@ OBJS_DFTU=dftu.o\
       dftu_hamilt.o
 
 OBJS_DELTASPIN=basic_funcs.o\
-      cal_h_lambda.o\
       cal_mw_from_lambda.o\
-      cal_mw_helper.o\
       cal_mw.o\
       init_sc.o\
       lambda_loop_helper.o\
       lambda_loop.o\
-      sc_parse_json.o\
       spin_constrain.o\
       template_helpers.o\
 
@@ -733,8 +724,13 @@ OBJS_TENSOR=tensor.o\
     dmr_complex.o\
     operator_lr_hxc.o\
     operator_lr_exx.o\
-    kernel_xc.o\
+    xc_kernel.o\
     pot_hxc_lrtd.o\
     lr_spectrum.o\
     hamilt_casida.o\
     esolver_lrtd_lcao.o\
+
+OBJS_RDMFT=rdmft.o\
+        rdmft_tools.o\
+        rdmft_pot.o\
+        update_state_rdmft.o\

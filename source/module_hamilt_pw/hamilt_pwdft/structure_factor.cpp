@@ -56,7 +56,7 @@ void Structure_Factor::set(const ModulePW::PW_Basis* rho_basis_in, const int& nb
 
 // Peize Lin optimize and add OpenMP 2021.04.01
 //  Calculate structure factor
-void Structure_Factor::setup_structure_factor(UnitCell* Ucell, const ModulePW::PW_Basis* rho_basis)
+void Structure_Factor::setup_structure_factor(const UnitCell* Ucell, const ModulePW::PW_Basis* rho_basis)
 {
     ModuleBase::TITLE("PW_Basis","setup_structure_factor");
     ModuleBase::timer::tick("PW_Basis","setup_struc_factor");
@@ -83,7 +83,7 @@ void Structure_Factor::setup_structure_factor(UnitCell* Ucell, const ModulePW::P
         for (int it=0; it<Ucell->ntype; it++)
         {
 	    	const int na = Ucell->atoms[it].na;
-	    	const ModuleBase::Vector3<double> * const tau = Ucell->atoms[it].tau;
+	    	const ModuleBase::Vector3<double> * const tau = Ucell->atoms[it].tau.data();
 #ifdef _OPENMP
 		    #pragma omp parallel for
 #endif
@@ -194,7 +194,7 @@ void Structure_Factor::setup_structure_factor(UnitCell* Ucell, const ModulePW::P
 //    1. Use "r2c" fft
 //    2. Add parallel algorithm for fftw or na loop
 //
-void Structure_Factor::bspline_sf(const int norder, UnitCell* Ucell, const ModulePW::PW_Basis* rho_basis)
+void Structure_Factor::bspline_sf(const int norder, const UnitCell* Ucell, const ModulePW::PW_Basis* rho_basis)
 {
     double *r = new double [rho_basis->nxyz]; 
     double *tmpr = new double[rho_basis->nrxx];
@@ -206,7 +206,7 @@ void Structure_Factor::bspline_sf(const int norder, UnitCell* Ucell, const Modul
     for (int it=0; it<Ucell->ntype; it++)
     {
 		const int na = Ucell->atoms[it].na;
-		const ModuleBase::Vector3<double> * const taud = Ucell->atoms[it].taud;
+		const ModuleBase::Vector3<double> * const taud = Ucell->atoms[it].taud.data();
         ModuleBase::GlobalFunc::ZEROS(r,rho_basis->nxyz);
 
         //A parallel algorithm can be added in the future.

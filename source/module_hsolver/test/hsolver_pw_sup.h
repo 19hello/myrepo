@@ -45,9 +45,6 @@ double& PW_Basis_K::getgk2(const int ik, const int igl) const {
     return this->gk2[igl];
 }
 
-FFT::FFT() {}
-
-FFT::~FFT() {}
 
 } // namespace ModulePW
 
@@ -183,7 +180,7 @@ template class DiagoIterAssist<std::complex<double>, base_device::DEVICE_CPU>;
 
 } // namespace hsolver
 
-#include "module_hamilt_pw/hamilt_pwdft/wavefunc.h"
+#include "module_psi/wavefunc.h"
 namespace hamilt {
 
 template <>
@@ -193,6 +190,8 @@ void diago_PAO_in_pw_k2(
     psi::Psi<std::complex<float>, base_device::DEVICE_CPU>& wvf,
     ModulePW::PW_Basis_K* wfc_basis,
     wavefunc* p_wf,
+    const ModuleBase::realArray& tab_at,
+    const int& lmaxkb,
     hamilt::Hamilt<std::complex<float>, base_device::DEVICE_CPU>* phm_in) {
     for (int i = 0; i < wvf.size(); i++) {
         wvf.get_pointer()[i] = std::complex<float>((float)i + 1, 0);
@@ -206,6 +205,8 @@ void diago_PAO_in_pw_k2(
     psi::Psi<std::complex<double>, base_device::DEVICE_CPU>& wvf,
     ModulePW::PW_Basis_K* wfc_basis,
     wavefunc* p_wf,
+    const ModuleBase::realArray& tab_at,
+    const int& lmaxkb,
     hamilt::Hamilt<std::complex<double>, base_device::DEVICE_CPU>* phm_in) {
     for (int i = 0; i < wvf.size(); i++) {
         wvf.get_pointer()[i] = std::complex<double>((double)i + 1, 0);

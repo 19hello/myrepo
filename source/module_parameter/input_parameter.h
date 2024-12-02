@@ -152,7 +152,7 @@ struct Input_para
     bool relax_new = true;
     bool relax = false; ///< allow relaxation along the specific direction
     double relax_scale_force = 0.5;
-    int relax_nmax = 0;        ///< number of max ionic iter
+    int relax_nmax = -1;       ///< number of max ionic iter
     double relax_cg_thr = 0.5; ///< threshold when cg to bfgs, pengfei add 2011-08-15
     double force_thr = -1;     ///< threshold of force in unit (Ry/Bohr)
     double force_thr_ev = -1;  ///< threshold of force in unit (eV/Angstrom)
@@ -299,6 +299,7 @@ struct Input_para
 
     // ==============   #Parameters (10.lr-tddft) ===========================
     int lr_nstates = 1; ///< the number of 2-particle states to be solved
+    std::vector<std::string> lr_init_xc_kernel = {};    ///< The method to initalize the xc kernel
     int nocc = -1;      ///< the number of occupied orbitals to form the 2-particle basis
     int nvirt = 1;      ///< the number of virtual orbitals to form the 2-particle basis (nocc + nvirt <= nbands)
     std::string xc_kernel = "LDA"; ///< exchange correlation (XC) kernel for LR-TDDFT
@@ -528,7 +529,8 @@ struct Input_para
     int sc_scf_nmin = 2;            ///< minimum number of outer scf loop before initial lambda loop
     double alpha_trial = 0.01;      ///< initial trial step size for lambda in eV/uB^2
     double sccut = 3.0;             ///< restriction of step size in eV/uB
-    std::string sc_file = "none";   ///< file name for Deltaspin (json format)
+    double sc_scf_thr = 1e-3;       ///< minimum number of outer scf loop before initial lambda loop
+    double sc_drop_thr = 1e-3;      ///< threshold for lambda-loop threshold cutoff in spin-constrained DFT
 
     // ==============   #Parameters (18.Quasiatomic Orbital analysis) =========
     ///<==========================================================
@@ -589,5 +591,12 @@ struct Input_para
     int  test_pp = 0;                ///< variables for test_pp only
     int  test_relax_method = false;  ///< variables for test_relax_method only
     int  test_deconstructor = false; ///< variables for test_deconstructor only
+
+    // ==============   #Parameters (21.RDMFT) =====================
+    // RDMFT    jghan added on 2024-07-06
+    bool rdmft = false;                           // rdmft, reduced density matrix funcional theory
+    double rdmft_power_alpha = 0.656;             // the alpha parameter of power-functional, g(occ_number) = occ_number^alpha
+    // double rdmft_wp22_omega;                 // the omega parameter of wp22-functional = exx_hse_omega
+
 };
 #endif

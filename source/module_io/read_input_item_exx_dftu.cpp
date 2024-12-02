@@ -26,6 +26,12 @@ void ReadInput::item_exx()
                 {
                     para.input.exx_hybrid_alpha = "0.25";
                 }
+                // added by jghan 2024-07-06
+                else if (dft_functional_lower == "muller" || dft_functional_lower == "power" 
+                        || dft_functional_lower == "wp22" || dft_functional_lower == "cwp22")
+                {
+                    para.input.exx_hybrid_alpha = "1";
+                }
                 else
                 { // no exx in scf, but will change to non-zero in
                     // postprocess like rpa
@@ -190,6 +196,20 @@ void ReadInput::item_exx()
                     para.input.exx_ccp_rmesh_times = "5";
                 }
                 else if (dft_functional_lower == "hse")
+                {
+                    para.input.exx_ccp_rmesh_times = "1.5";
+                }
+                // added by jghan 2024-07-06
+                else if (dft_functional_lower == "muller" || dft_functional_lower == "power")
+                {
+                    para.input.exx_ccp_rmesh_times = "5";
+                }
+                else if (dft_functional_lower == "wp22")
+                {
+                    para.input.exx_ccp_rmesh_times = "5";
+                    // exx_ccp_rmesh_times = "1.5";
+                }
+                else if (dft_functional_lower == "cwp22")
                 {
                     para.input.exx_ccp_rmesh_times = "1.5";
                 }
@@ -398,10 +418,10 @@ void ReadInput::item_dftu()
         item.annotation = "radius of the sphere for onsite projection (Bohr)";
         read_sync_double(input.onsite_radius);
         item.reset_value = [](const Input_Item& item, Parameter& para) {
-            if (para.input.dft_plus_u == 1 && para.input.onsite_radius == 0.0)
+            if ((para.input.dft_plus_u == 1 || para.input.sc_mag_switch) && para.input.onsite_radius == 0.0)
             {
-                // autoset onsite_radius to 5.0 as default
-                para.input.onsite_radius = 5.0;
+                // autoset onsite_radius to 3.0 as default, this default value comes from the systematic atomic magnetism test
+                para.input.onsite_radius = 3.0;
             }
         };
         this->add_item(item);

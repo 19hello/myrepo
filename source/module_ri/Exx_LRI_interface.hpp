@@ -72,6 +72,12 @@ void Exx_LRI_Interface<T, Tdata>::exx_beforescf(const int istep, const K_Vectors
             {
                 XC_Functional::set_xc_type("scan");
             }
+            // added by jghan, 2024-07-07
+            else if ( ucell.atoms[0].ncpp.xc_func == "MULLER" || ucell.atoms[0].ncpp.xc_func == "POWER" 
+                || ucell.atoms[0].ncpp.xc_func == "WP22" || ucell.atoms[0].ncpp.xc_func == "CWP22" )
+            {
+                XC_Functional::set_xc_type("pbe");
+            }
         }
         this->exx_ptr->cal_exx_ions(PARAM.inp.out_ri_cv);
     }
@@ -122,10 +128,11 @@ void Exx_LRI_Interface<T, Tdata>::exx_eachiterinit(const int istep, const elecst
                 if (this->exx_spacegroup_symmetry && GlobalC::exx_info.info_global.exx_symmetry_realspace) { this->exx_ptr->cal_exx_elec(Ds, *dm_in.get_paraV_pointer(), &this->symrot_); }
                 else { this->exx_ptr->cal_exx_elec(Ds, *dm_in.get_paraV_pointer()); }
             };
-            if(istep > 0 && flag_restart)
+            if(istep > 0 && flag_restart) {
                 cal(*dm_last_step);
-            else
+            } else {
                 cal(dm);
+}
         }
     }
 }
@@ -141,8 +148,14 @@ void Exx_LRI_Interface<T, Tdata>::exx_hamilt2density(elecstate::ElecState& elec,
         if (GlobalC::restart.info_load.load_H_finish && !GlobalC::restart.info_load.restart_exx
             && this->two_level_step == 0 && iter == 1)
         {
-            if (GlobalV::MY_RANK == 0) {GlobalC::restart.load_disk("Eexx", 0, 1, &this->exx_ptr->Eexx);
-}
+            if (GlobalV::MY_RANK == 0)
+            {
+                try { GlobalC::restart.load_disk("Eexx", 0, 1, &this->exx_ptr->Eexx); }
+                catch (const std::exception& e)
+                {
+                    std::cout << "WARNING: Cannot read Eexx from disk, the energy of the 1st loop will be wrong, sbut it does not influence the subsequent loops." << std::endl;
+                }
+            }
             Parallel_Common::bcast_double(this->exx_ptr->Eexx);
             this->exx_ptr->Eexx /= GlobalC::exx_info.info_global.hybrid_alpha;
         }

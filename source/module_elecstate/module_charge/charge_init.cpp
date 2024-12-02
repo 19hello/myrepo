@@ -157,7 +157,25 @@ void Charge::init_rho(elecstate::efermi& eferm_iout,
     {
         for (int is = 0; is < PARAM.inp.nspin; ++is)
         {
-            GlobalC::restart.load_disk("charge", is, this->nrxx, rho[is]);
+            try
+            {
+                GlobalC::restart.load_disk("charge", is, this->nrxx, rho[is]);
+            }
+            catch (const std::exception& e)
+            {
+                // try to load from the output of `out_chg` 
+                std::stringstream ssc;
+                ssc << PARAM.globalv.global_readin_dir << "SPIN" << is + 1 << "_CHG.cube";
+                if (ModuleIO::read_vdata_palgrid(GlobalC::Pgrid,
+                    (PARAM.inp.esolver_type == "sdft" ? GlobalV::RANK_IN_STOGROUP : GlobalV::MY_RANK),
+                    GlobalV::ofs_running,
+                    ssc.str(),
+                    this->rho[is],
+                    GlobalC::ucell.nat))
+                {
+                    GlobalV::ofs_running << " Read in the charge density: " << ssc.str() << std::endl;
+                }
+            }
         }
         GlobalC::restart.info_load.load_charge_finish = true;
     }
@@ -181,9 +199,7 @@ void Charge::init_rho(elecstate::efermi& eferm_iout,
 //==========================================================
 // computes the core charge on the real space 3D mesh.
 //==========================================================
-void Charge::set_rho_core(
-    const ModuleBase::ComplexMatrix &structure_factor
-)
+void Charge::set_rho_core(const ModuleBase::ComplexMatrix& structure_factor, const bool* numeric)
 {
     ModuleBase::TITLE("Charge","set_rho_core");
     ModuleBase::timer::tick("Charge","set_rho_core");
@@ -231,7 +247,7 @@ void Charge::set_rho_core(
 // each shell of g vec
 //----------------------------------------------------------
             this->non_linear_core_correction(
-                GlobalC::ppcell.numeric,
+                numeric,
                 GlobalC::ucell.atoms[it].ncpp.msh,
                 GlobalC::ucell.atoms[it].ncpp.r.data(),
                 GlobalC::ucell.atoms[it].ncpp.rab.data(),
