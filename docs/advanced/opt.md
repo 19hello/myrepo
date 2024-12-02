@@ -24,9 +24,9 @@ The [BFGS method](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%9
 
 In ABACUS, we implemented the BFGS method for doing fixed-cell structural relaxation.
 
-### BFGS_TRAD method
+We have alse implemented an alternative BFGS method, which can be called by using the keyword 'bfgs_trad'.
 
-The BFGS_TRAD method is an algorithm implemented in ABACUS, referencing the BFGS method from ASE. The previous BFGS method in ABACUS did not perform well for some tests and the BFGS_TRAD method now produces results that are consistant with the BFGS method in ASE. In cases where the previous BFGS method could not converge within a limited number of steps, the BFGS_TRAD method can successfully converge.
+The bfgs_trad method is a quasi-Newton method that substitute an approximate matrix B for the Hessian matrix. The optimization direction is determined by the inverse of B, therefore, only the inverse of B is iteratively updated and no time-consuming operations such as matrix inversion are involved.
 
 ### SD method
 
