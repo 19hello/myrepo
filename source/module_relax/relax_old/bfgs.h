@@ -49,7 +49,7 @@ public:
      * @param _size 
      */
     void allocate(const int _size);//initialize parameters
-    void relax_step(const ModuleBase::matrix _force,UnitCell& ucell);//
+    void relax_step(const ModuleBase::matrix& _force,UnitCell& ucell);//
     void PrepareStep(std::vector<std::vector<double>>& force,std::vector<std::vector<double>>& pos,std::vector<std::vector<double>>& H,std::vector<double>& pos0,std::vector<double>& force0,std::vector<double>& steplength,std::vector<std::vector<double>>& dpos,UnitCell& ucell);
     void IsRestrain(std::vector<std::vector<double>>& dpos);
 
