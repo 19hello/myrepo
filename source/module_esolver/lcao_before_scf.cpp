@@ -1,9 +1,9 @@
+#include "module_elecstate/cal_ux.h"
 #include "module_elecstate/module_charge/symmetry_rho.h"
 #include "module_esolver/esolver_ks_lcao.h"
 #include "module_hamilt_lcao/hamilt_lcaodft/hamilt_lcao.h"
 #include "module_hamilt_lcao/module_dftu/dftu.h"
 #include "module_hamilt_pw/hamilt_pwdft/global.h"
-#include "module_elecstate/cal_ux.h"
 //
 #include "module_base/timer.h"
 #include "module_cell/module_neighbor/sltk_atom_arrange.h"
@@ -43,9 +43,10 @@ template <typename TK, typename TR>
 void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
 {
     ModuleBase::TITLE("ESolver_KS_LCAO", "before_scf");
+    ModuleBase::timer::tick("ESolver_KS_LCAO", "before_scf");
 
-    //! 1) call before_scf() of ESolver_FP
-    ESolver_FP::before_scf(ucell, istep);
+    //! 1) call before_scf() of ESolver_KS
+    ESolver_KS<TK>::before_scf(ucell, istep);
 
     if (ucell.ionic_position_updated)
     {
@@ -80,7 +81,7 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
 
     atom_arrange::search(PARAM.inp.search_pbc,
                          GlobalV::ofs_running,
-                         GlobalC::GridD,
+                         this->gd,
                          ucell,
                          search_radius,
                          PARAM.inp.test_atom_input);
@@ -110,7 +111,7 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
                              this->pw_rho->nplane,
                              this->pw_rho->startz_current,
                              ucell,
-                             GlobalC::GridD,
+                             this->gd,
                              dr_uniform,
                              rcuts,
                              psi_u,
@@ -127,7 +128,7 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
     // (2)For each atom, calculate the adjacent atoms in different cells
     // and allocate the space for H(R) and S(R).
     // If k point is used here, allocate HlocR after atom_arrange.
-    this->RA.for_2d(ucell,this->pv, PARAM.globalv.gamma_only_local, orb_.cutoffs());
+    this->RA.for_2d(ucell, this->gd, this->pv, PARAM.globalv.gamma_only_local, orb_.cutoffs());
 
     // 2. density matrix extrapolation
 
@@ -189,6 +190,7 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
             PARAM.globalv.gamma_only_local ? &(this->GG) : nullptr,
             PARAM.globalv.gamma_only_local ? nullptr : &(this->GK),
             ucell,
+            this->gd,
             &this->pv,
             this->pelec->pot,
             this->kv,
@@ -212,15 +214,11 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
     {
         const Parallel_Orbitals* pv = &this->pv;
         // build and save <psi(0)|alpha(R)> at beginning
-        GlobalC::ld.build_psialpha(PARAM.inp.cal_force,
-                                   ucell,
-                                   orb_,
-                                   GlobalC::GridD,
-                                   *(two_center_bundle_.overlap_orb_alpha));
+        GlobalC::ld.build_psialpha(PARAM.inp.cal_force, ucell, orb_, this->gd, *(two_center_bundle_.overlap_orb_alpha));
 
         if (PARAM.inp.deepks_out_unittest)
         {
-            GlobalC::ld.check_psialpha(PARAM.inp.cal_force, ucell, orb_, GlobalC::GridD);
+            GlobalC::ld.check_psialpha(PARAM.inp.cal_force, ucell, orb_, this->gd);
         }
     }
 #endif
@@ -237,7 +235,6 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
                    &(this->pv),
                    PARAM.inp.nspin,
                    this->kv,
-                   PARAM.inp.ks_solver,
                    this->p_hamilt,
                    this->psi,
                    this->pelec);
@@ -311,11 +308,9 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
     // two cases are considered:
     // 1. DMK in DensityMatrix is not empty (istep > 0), then DMR is initialized by DMK
     // 2. DMK in DensityMatrix is empty (istep == 0), then DMR is initialized by zeros
-    if(istep > 0)
+    if (istep > 0)
     {
-        dynamic_cast<elecstate::ElecStateLCAO<TK>*>(this->pelec)
-            ->get_DM()
-            ->cal_DMR();
+        dynamic_cast<elecstate::ElecStateLCAO<TK>*>(this->pelec)->get_DM()->cal_DMR();
     }
 
     if (PARAM.inp.dm_to_rho)
@@ -349,6 +344,7 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
                                           1);
         }
 
+        ModuleBase::timer::tick("ESolver_KS_LCAO", "before_scf");
         return;
     }
 
@@ -370,15 +366,18 @@ void ESolver_KS_LCAO<TK, TR>::before_scf(UnitCell& ucell, const int istep)
     this->p_hamilt->non_first_scf = istep;
 
     // update in ion-step
-    if( PARAM.inp.rdmft == true )
+    if (PARAM.inp.rdmft == true)
     {
         // necessary operation of these parameters have be done with p_esolver->Init() in source/driver_run.cpp
-        rdmft_solver.update_ion(ucell, *(this->pw_rho), this->ppcell.vloc, this->sf.strucFac);   // add by jghan, 2024-03-16/2024-10-08
+        rdmft_solver.update_ion(ucell,
+                                *(this->pw_rho),
+                                this->ppcell.vloc,
+                                this->sf.strucFac); // add by jghan, 2024-03-16/2024-10-08
     }
 
+    ModuleBase::timer::tick("ESolver_KS_LCAO", "before_scf");
     return;
 }
-
 
 template class ESolver_KS_LCAO<double, double>;
 template class ESolver_KS_LCAO<std::complex<double>, double>;

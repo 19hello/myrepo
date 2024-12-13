@@ -170,6 +170,7 @@ OBJS_BASE=abfs-vector3_order.o\
     broyden_mixing.o\
     memory_op.o\
     device.o\
+    parallel_2d.o\
 
 OBJS_CELL=atom_pseudo.o\
     atom_spec.o\
@@ -182,7 +183,6 @@ OBJS_CELL=atom_pseudo.o\
     read_pp_vwr.o\
     unitcell.o\
     read_atoms.o\
-    read_cell_pseudopots.o\
     setup_nonlocal.o\
     klist.o\
     cell_index.o\
@@ -201,9 +201,7 @@ OBJS_DEEPKS=LCAO_deepks.o\
         deepks_hmat.o\
         LCAO_deepks_interface.o\
         orbital_precalc.o\
-        orbital_precalc_k.o\
         cal_gdmx.o\
-        cal_gdmx_k.o\
         cal_gedm.o\
         cal_gvx.o\
         cal_descriptor.o\
@@ -229,6 +227,8 @@ OBJS_ELECSTAT=elecstate.o\
     H_TDDFT_pw.o\
     pot_xc.o\
     cal_ux.o\
+    cal_nelec_nband.o\
+    read_pseudo.o\
 
 OBJS_ELECSTAT_LCAO=elecstate_lcao.o\
       elecstate_lcao_cal_tau.o\
@@ -366,8 +366,7 @@ OBJS_MD=fire.o\
     run_md.o\
     verlet.o\
 
-OBJS_NEIGHBOR=sltk_adjacent_set.o\
-    sltk_atom.o\
+OBJS_NEIGHBOR=sltk_atom.o\
     sltk_atom_arrange.o\
     sltk_atom_input.o\
     sltk_grid.o\
@@ -379,7 +378,6 @@ OBJS_ORBITAL=ORB_atomic.o\
       ORB_nonlocal.o\
       ORB_nonlocal_lm.o\
       ORB_read.o\
-      parallel_2d.o\
       parallel_orbitals.o\
 	  atomic_radials.o\
       hydrogen_radials.o\
@@ -634,10 +632,13 @@ OBJS_SRCPW=H_Ewald_pw.o\
     forces_nl.o\
     forces_cc.o\
     forces_scc.o\
+    forces_onsite.o\
+    onsite_proj_pw.o\
     fs_nonlocal_tools.o\
     fs_kin_tools.o\
     force_op.o\
     stress_op.o\
+    onsite_op.o\
     wf_op.o\
     vnl_op.o\
     global.o\
@@ -662,6 +663,7 @@ OBJS_SRCPW=H_Ewald_pw.o\
     stress_func_loc.o\
     stress_func_nl.o\
     stress_func_us.o\
+    stress_func_onsite.o\
     stress_pw.o\
     of_stress_pw.o\
     symmetry_rho.o\
@@ -672,7 +674,9 @@ OBJS_SRCPW=H_Ewald_pw.o\
     elecond.o\
     sto_tool.o\
     sto_elecond.o\
-    sto_dos.o
+    sto_dos.o\
+    onsite_projector.o\
+    onsite_proj_tools.o
 
 OBJS_VDW=vdw.o\
     vdwd2_parameters.o\
@@ -690,7 +694,8 @@ OBJS_DFTU=dftu.o\
       dftu_io.o\
       dftu_tools.o\
       dftu_occup.o\
-      dftu_hamilt.o
+      dftu_hamilt.o\
+      dftu_pw.o
 
 OBJS_DELTASPIN=basic_funcs.o\
       cal_mw_from_lambda.o\
