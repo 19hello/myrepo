@@ -421,10 +421,8 @@ else()
   include_directories(${FFTW3_INCLUDE_DIRS})
   list(APPEND math_libs FFTW3::FFTW3 LAPACK::LAPACK BLAS::BLAS)
 
-  if(ENABLE_LCAO)
-    find_package(ScaLAPACK REQUIRED)
-    list(APPEND math_libs ScaLAPACK::ScaLAPACK)
-  endif()
+  find_package(ScaLAPACK REQUIRED)
+  list(APPEND math_libs ScaLAPACK::ScaLAPACK)
 
   if(USE_OPENMP)
     list(APPEND math_libs FFTW3::FFTW3_OMP)
@@ -713,7 +711,9 @@ target_link_libraries(
   esolver
   vdw
   device
-  container)
+  container
+  dftu
+  deltaspin)
 if(ENABLE_LCAO)
   target_link_libraries(
     ${ABACUS_BIN_NAME}
@@ -721,9 +721,7 @@ if(ENABLE_LCAO)
     tddft
     orb
     gint
-    dftu
     hcontainer
-    deltaspin
     numerical_atomic_orbitals
     lr
     rdmft)

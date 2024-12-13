@@ -112,7 +112,7 @@ void ESolver_OF::before_all_runners(UnitCell& ucell, const Input_para& inp)
     ModuleBase::GlobalFunc::DONE(GlobalV::ofs_running, "INIT BASIS");
 
     // initialize local pseudopotential
-    this->locpp.init_vloc(pw_rho);
+    this->locpp.init_vloc(ucell,pw_rho);
     ModuleBase::GlobalFunc::DONE(GlobalV::ofs_running, "LOCAL POTENTIAL");
 
 
@@ -200,6 +200,9 @@ void ESolver_OF::runner(UnitCell& ucell, const int istep)
  */
 void ESolver_OF::before_opt(const int istep, UnitCell& ucell)
 {
+    ModuleBase::TITLE("ESolver_OF", "before_opt");
+    ModuleBase::timer::tick("ESolver_OF", "before_opt");
+
     //! 1) call before_scf() of ESolver_FP
     ESolver_FP::before_scf(ucell, istep);
 
@@ -299,6 +302,8 @@ void ESolver_OF::before_opt(const int istep, UnitCell& ucell)
     {
         this->theta_[0] = 0.2;
     }
+
+    ModuleBase::timer::tick("ESolver_OF", "before_opt");
 }
 
 /**
@@ -483,6 +488,9 @@ bool ESolver_OF::check_exit()
  */
 void ESolver_OF::after_opt(const int istep, UnitCell& ucell)
 {
+    ModuleBase::TITLE("ESolver_OF", "after_opt");
+    ModuleBase::timer::tick("ESolver_OF", "after_opt");
+
     // 1) calculate the kinetic energy density
     if (PARAM.inp.out_elf[0] > 0)
     {
@@ -491,6 +499,8 @@ void ESolver_OF::after_opt(const int istep, UnitCell& ucell)
 
     // 2) call after_scf() of ESolver_FP
     ESolver_FP::after_scf(ucell, istep);
+
+    ModuleBase::timer::tick("ESolver_OF", "after_opt");
 }
 
 /**
@@ -538,7 +548,7 @@ double ESolver_OF::cal_energy()
 void ESolver_OF::cal_force(UnitCell& ucell, ModuleBase::matrix& force)
 {
     Forces<double> ff(ucell.nat);
-    ff.cal_force(force, *pelec, this->pw_rho, &ucell.symm, &sf, &this->locpp);
+    ff.cal_force(ucell,force, *pelec, this->pw_rho, &ucell.symm, &sf, &this->locpp);
 }
 
 /**
