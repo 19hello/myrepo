@@ -24,7 +24,9 @@
 #include "source_base/timer.h"
 #include "source_io/module_output/output_log.h"
 #include "source_io/module_output/cif_io.h"
+#include "source_cell/module_neighlist/neighbor_search.h"
 
+#include <numeric>
 #include <iomanip>
 #include <sstream>
 #include <unordered_map>
@@ -43,7 +45,6 @@ void ESolver_DP::before_all_runners(UnitCell& ucell, const Input_para& inp)
                                "data_?");
 
     atype.resize(ucell.nat);
-
     rescaling = inp.mdp.dp_rescaling;
     fparam = inp.mdp.dp_fparam;
     aparam = inp.mdp.dp_aparam;
@@ -85,12 +86,51 @@ void ESolver_DP::runner(UnitCell& ucell, const int istep)
     assert(ucell.nat == iat);
 
 #ifdef __DPMD
-    std::vector<double> f, v;
+    /*std::vector<double> f, v;
     dp_potential = 0;
     dp_force.zero_out();
     dp_virial.zero_out();
+     NeighborSearch neighbor_search;
+  neighbor_search.init(ucell, dp.cutoff() * ModuleBase::ANGSTROM_AU, 0);
+  neighbor_search.build_neighbors();
 
-    dp.compute(dp_potential, f, v, coord, atype, cell, fparam, aparam);
+  const int nlocal = ucell.nat;
+  const int nall = neighbor_search.all_atoms.size();
+  const int nghost = nall - nlocal;
+
+  std::vector<double> coord_dp(3 * nall);
+  std::vector<int> atype_dp(nall);
+
+  for (int i = 0; i < nall; ++i)
+  {
+      coord_dp[3 * i]     = neighbor_search.all_atoms[i].position_x * ucell.lat0_angstrom;
+      coord_dp[3 * i + 1] = neighbor_search.all_atoms[i].position_y * ucell.lat0_angstrom;
+      coord_dp[3 * i + 2] = neighbor_search.all_atoms[i].position_z * ucell.lat0_angstrom;
+
+      atype_dp[i] = 0;
+  }
+
+  std::vector<int> ilist(nlocal);
+  std::iota(ilist.begin(), ilist.end(), 0);
+
+  std::vector<int> numneigh(nlocal);
+  std::vector<int*> firstneigh(nlocal);
+
+  for (int i = 0; i < nlocal; ++i)
+  {
+      numneigh[i] = neighbor_search.neighbor_list.numneigh[i];
+      firstneigh[i] = neighbor_search.neighbor_list.firstneigh[i];
+  }
+
+  deepmd::hpp::InputNlist input_nlist(
+      nlocal,
+      ilist.data(),
+      numneigh.data(),
+      firstneigh.data()
+  );
+
+  const int ago = 0;
+  dp.compute(dp_potential, f, v, coord_dp, atype_dp, cell, nghost, input_nlist, ago, fparam, aparam);
 
     // rescale the energy, force, and stress
     const double fact_e = rescaling / ModuleBase::Ry_to_eV;
@@ -101,12 +141,69 @@ void ESolver_DP::runner(UnitCell& ucell, const int istep)
     GlobalV::ofs_running << " #TOTAL ENERGY# " << std::setprecision(11) << dp_potential * ModuleBase::Ry_to_eV << " eV"
                          << std::endl;
 
+    std::vector<int> atom_type_offsets(ucell.ntype + 1, 0);
+    for (int it = 0; it < ucell.ntype; ++it)
+    {
+        atom_type_offsets[it + 1] = atom_type_offsets[it] + ucell.atoms[it].na;
+    }
+
+    std::vector<double> local_force(3 * nlocal, 0.0);
+    for (int i = 0; i < nall; ++i)
+    {
+        int ireal = i;
+        if (i >= nlocal)
+        {
+            const auto& atom = neighbor_search.all_atoms[i];
+            ireal = atom_type_offsets[atom.atom_type] + atom.atom_index;
+        }
+        assert(ireal >= 0 && ireal < nlocal);
+
+        local_force[3 * ireal] += f[3 * i];
+        local_force[3 * ireal + 1] += f[3 * i + 1];
+        local_force[3 * ireal + 2] += f[3 * i + 2];
+    }
+
     for (int i = 0; i < ucell.nat; ++i)
     {
+        dp_force(i, 0) = local_force[3 * i] * fact_f;
+        dp_force(i, 1) = local_force[3 * i + 1] * fact_f;
+        dp_force(i, 2) = local_force[3 * i + 2] * fact_f;
+    }*/
+
+
+
+
+
+
+
+
+    std::vector<double> f, v;
+    dp_potential = 0;
+    dp_force.zero_out();
+    dp_virial.zero_out();
+    dp.compute(dp_potential, f, v, coord, atype, cell, fparam, aparam);
+
+    // rescale the energy, force, and stress
+    const double fact_e = rescaling / ModuleBase::Ry_to_eV;
+    const double fact_f = rescaling / (ModuleBase::Ry_to_eV * ModuleBase::ANGSTROM_AU);
+    const double fact_v = rescaling / (ucell.omega * ModuleBase::Ry_to_eV);
+
+    dp_potential *= fact_e;
+    GlobalV::ofs_running << " #TOTAL ENERGY# " << std::setprecision(11) << dp_potential * ModuleBase::Ry_to_eV << " eV"
+                         << std::endl;
+    for (int i = 0; i < ucell.nat; ++i)
+    {
+        // Original direct assignment ignored ghost-atom force contributions.
         dp_force(i, 0) = f[3 * i] * fact_f;
         dp_force(i, 1) = f[3 * i + 1] * fact_f;
         dp_force(i, 2) = f[3 * i + 2] * fact_f;
     }
+
+
+
+
+
+
 
     for (int i = 0; i < 3; ++i)
     {

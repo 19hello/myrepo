@@ -201,12 +201,34 @@ void NeighborSearch::setMemberVariables(const IAtomProvider& ucell)
 
     int atom_count = 0;
 
+    for (int i = 0; i < ucell.get_ntype(); i++)
+                {
+                    for (int j = 0; j < ucell.get_na(i); j++)
+                    {
+                        double x = ucell.get_tauu(i,j).x ;
+                        double y = ucell.get_tauu(i,j).y ;
+                        double z = ucell.get_tauu(i,j).z ;
+
+                        NeighborAtom atom(x, y, z, i, j, atom_count);
+
+                        atom.is_inside = true;
+
+                        all_atoms.push_back(atom);
+                        atom_count++;
+                    }
+                }
+
     for (int ix = -glayerX_minus; ix < glayerX; ix++)
     {
         for (int iy = -glayerY_minus; iy < glayerY; iy++)
         {
             for (int iz = -glayerZ_minus; iz < glayerZ; iz++)
             {
+                if(ix==0&&iy==0&&iz==0)
+                {
+                        continue;
+
+                }
                 for (int i = 0; i < ucell.get_ntype(); i++)
                 {
                     for (int j = 0; j < ucell.get_na(i); j++)
@@ -216,14 +238,17 @@ void NeighborSearch::setMemberVariables(const IAtomProvider& ucell)
                         double z = ucell.get_tauu(i,j).z + vec1[2] * ix + vec2[2] * iy + vec3[2] * iz;
 
                         NeighborAtom atom(x, y, z, i, j, atom_count);
-                        if(ix==0&&iy==0&&iz==0)
-                        {
-                            atom.is_inside = true;
-                        }
-                        else
-                        {
-                            atom.is_inside = false;
-                        }
+
+                        // if(ix==0&&iy==0&&iz==0)
+                        // {
+                        //     atom.is_inside = true;
+                        // }
+                        // else
+                        // {
+                        //     atom.is_inside = false;
+                        // }
+                        atom.is_inside = false;
+
                         all_atoms.push_back(atom);
                         atom_count++;
                     }

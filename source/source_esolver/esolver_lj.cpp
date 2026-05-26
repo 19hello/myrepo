@@ -99,7 +99,6 @@ void ESolver_LJ::runner(UnitCell& ucell, const int istep)
         }
     }
 
-
     /*Grid_Driver grid_neigh(PARAM.inp.test_deconstructor, PARAM.inp.test_grid);
     atom_arrange::search(PARAM.globalv.search_pbc,
                          GlobalV::ofs_running,
@@ -143,6 +142,9 @@ void ESolver_LJ::runner(UnitCell& ucell, const int istep)
             index++;
         }
     }*/
+
+
+    
 
     lj_potential /= 2.0;
     GlobalV::ofs_running << " #TOTAL ENERGY# " << std::setprecision(11) << lj_potential * ModuleBase::Ry_to_eV << " eV"
