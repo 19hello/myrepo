@@ -8,7 +8,6 @@
 double UnitCellLite::get_lat0() const {
     return lat0_;
 }
-
 double UnitCellLite::get_omega() const {
     return omega_;
 }
