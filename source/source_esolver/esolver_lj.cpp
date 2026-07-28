@@ -43,8 +43,13 @@ namespace ModuleESolver
         return ucell_lite;
     }
 
-void ESolver_LJ::before_all_runners(UnitCell& ucell, const Input_para& inp)
+void ESolver_LJ::before_all_runners(BaseCell& cell, const Input_para& inp)
 {
+    if (cell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT("ESolver_LJ::before_all_runners", "ESolver_LJ only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(cell);
     lj_potential = 0;
     lj_force.create(ucell.nat, 3);
     lj_virial.create(3, 3);
@@ -64,8 +69,14 @@ void ESolver_LJ::before_all_runners(UnitCell& ucell, const Input_para& inp)
     cal_en_shift(ucell.ntype, inp.mdp.lj_eshift);
 }
 
-void ESolver_LJ::runner(UnitCell& ucell, const int istep)
+void ESolver_LJ::runner(BaseCell& cell, const int istep)
 {
+    static_cast<void>(istep);
+    if (cell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT("ESolver_LJ::runner", "ESolver_LJ only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(cell);
     UnitCellLite ucell_lite = change_from_ucell_to_ucell_lite(ucell);
     NeighborSearch neighbor_search;
 
@@ -242,14 +253,23 @@ void ESolver_LJ::runner(UnitCell& ucell, const int istep)
         return lj_potential;
     }
 
-    void ESolver_LJ::cal_force(UnitCell& ucell, ModuleBase::matrix& force)
+    void ESolver_LJ::cal_force(BaseCell& cell, ModuleBase::matrix& force)
     {
+        if (cell.kind() != BaseCell::Kind::unit_cell)
+        {
+            ModuleBase::WARNING_QUIT("ESolver_LJ::cal_force", "ESolver_LJ only supports UnitCell.");
+        }
+        UnitCell& ucell = static_cast<UnitCell&>(cell);
         force = lj_force;
         ModuleIO::print_force(GlobalV::ofs_running, ucell, "TOTAL-FORCE (eV/Angstrom)", force, false);
     }
 
-    void ESolver_LJ::cal_stress(UnitCell& ucell, ModuleBase::matrix& stress)
+    void ESolver_LJ::cal_stress(BaseCell& cell, ModuleBase::matrix& stress)
     {
+        if (cell.kind() != BaseCell::Kind::unit_cell)
+        {
+            ModuleBase::WARNING_QUIT("ESolver_LJ::cal_stress", "ESolver_LJ only supports UnitCell.");
+        }
         stress = lj_virial;
 
         const bool screen = true;
@@ -265,8 +285,12 @@ void ESolver_LJ::runner(UnitCell& ucell, const int istep)
         }
     }
 
-    void ESolver_LJ::after_all_runners(UnitCell& ucell)
+    void ESolver_LJ::after_all_runners(BaseCell& cell)
     {
+        if (cell.kind() != BaseCell::Kind::unit_cell)
+        {
+            ModuleBase::WARNING_QUIT("ESolver_LJ::after_all_runners", "ESolver_LJ only supports UnitCell.");
+        }
         GlobalV::ofs_running << "\n --------------------------------------------" << std::endl;
         GlobalV::ofs_running << std::setprecision(16);
         GlobalV::ofs_running << " !FINAL_ETOT_IS " << lj_potential * ModuleBase::Ry_to_eV << " eV" << std::endl;

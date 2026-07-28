@@ -35,8 +35,14 @@ ESolver_KS::~ESolver_KS()
 }
 
 
-void ESolver_KS::before_all_runners(UnitCell& ucell, const Input_para& inp)
+void ESolver_KS::before_all_runners(BaseCell& basecell, const Input_para& inp)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     ModuleBase::TITLE("ESolver_KS", "before_all_runners");
 
     //! 1) setup "before_all_runniers" in ESolver_FP
@@ -116,8 +122,14 @@ void ESolver_KS::hamilt2rho(UnitCell& ucell, const int istep, const int iter, co
     }
 }
 
-void ESolver_KS::runner(UnitCell& ucell, const int istep)
+void ESolver_KS::runner(BaseCell& basecell, const int istep)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     ModuleBase::TITLE("ESolver_KS", "runner");
     ModuleBase::timer::start(this->classname, "runner");
 
@@ -308,8 +320,14 @@ void ESolver_KS::after_scf(UnitCell& ucell, const int istep, const bool conv_eso
 
 }
 
-void ESolver_KS::after_all_runners(UnitCell& ucell)
+void ESolver_KS::after_all_runners(BaseCell& basecell)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     // 1) write Etot information
     ESolver_FP::after_all_runners(ucell);
 }

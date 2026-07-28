@@ -28,8 +28,14 @@ ESolver_OF_TDDFT::~ESolver_OF_TDDFT()
 }
 
 
-void ESolver_OF_TDDFT::runner(UnitCell& ucell, const int istep)
+void ESolver_OF_TDDFT::runner(BaseCell& basecell, const int istep)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     ModuleBase::timer::start("ESolver_OF_TDDFT", "runner");
     // get Ewald energy, initial rho and phi if necessary
     this->before_opt(istep, ucell);

@@ -35,8 +35,14 @@ ESolver_FP::~ESolver_FP()
 	delete this->pelec;
 }
 
-void ESolver_FP::before_all_runners(UnitCell& ucell, const Input_para& inp)
+void ESolver_FP::before_all_runners(BaseCell& basecell, const Input_para& inp)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     ModuleBase::TITLE("ESolver_FP", "before_all_runners");
 
     //! 1) read pseudopotentials
@@ -254,8 +260,14 @@ void ESolver_FP::iter_finish(UnitCell& ucell, const int istep, int& iter, bool& 
     }
 }
 
-void ESolver_FP::after_all_runners(UnitCell& ucell)
+void ESolver_FP::after_all_runners(BaseCell& basecell)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     // print out the final total energy
     GlobalV::ofs_running << "\n --------------------------------------------" << std::endl;
     GlobalV::ofs_running << std::setprecision(16);

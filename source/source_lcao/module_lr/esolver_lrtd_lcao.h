@@ -33,13 +33,27 @@ namespace LR
 
         ///input: input, call, basis(LCAO), psi(ground state), elecstate
         // initialize sth. independent of the ground state
-        virtual void before_all_runners(UnitCell& ucell, const Input_para& inp) override;
-        virtual void runner(UnitCell& ucell, int istep) override;
-        virtual void after_all_runners(UnitCell& ucell) override;
+        virtual void before_all_runners(BaseCell& basecell, const Input_para& inp) override;
+        virtual void runner(BaseCell& basecell, int istep) override;
+        virtual void after_all_runners(BaseCell& basecell) override;
 
         virtual double cal_energy()  override { return 0.0; };
-        virtual void cal_force(UnitCell& ucell, ModuleBase::matrix& force) override {};
-        virtual void cal_stress(UnitCell& ucell, ModuleBase::matrix& stress) override {};
+        virtual void cal_force(BaseCell& basecell, ModuleBase::matrix& force) override
+        {
+            static_cast<void>(force);
+            if (basecell.kind() != BaseCell::Kind::unit_cell)
+            {
+                ModuleBase::WARNING_QUIT("ESolver_LR::cal_force", "ESolver_LR only supports UnitCell.");
+            }
+        };
+        virtual void cal_stress(BaseCell& basecell, ModuleBase::matrix& stress) override
+        {
+            static_cast<void>(stress);
+            if (basecell.kind() != BaseCell::Kind::unit_cell)
+            {
+                ModuleBase::WARNING_QUIT("ESolver_LR::cal_stress", "ESolver_LR only supports UnitCell.");
+            }
+        };
 
       protected:
         const Input_para& input;

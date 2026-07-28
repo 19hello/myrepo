@@ -29,8 +29,14 @@ namespace ModuleESolver
 {
 
 template <typename TK, typename TR>
-void ESolver_KS_LCAO<TK, TR>::others(UnitCell& ucell, const int istep)
+void ESolver_KS_LCAO<TK, TR>::others(BaseCell& basecell, const int istep)
 {
+    if (basecell.kind() != BaseCell::Kind::unit_cell)
+    {
+        ModuleBase::WARNING_QUIT(__FUNCTION__, "This ESolver only supports UnitCell.");
+    }
+    UnitCell& ucell = static_cast<UnitCell&>(basecell);
+
     ModuleBase::TITLE("ESolver_KS_LCAO", "others");
     ModuleBase::timer::start("ESolver_KS_LCAO", "others");
 
