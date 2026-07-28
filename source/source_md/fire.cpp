@@ -6,7 +6,7 @@
 #endif
 #include "source_base/timer.h"
 
-FIRE::FIRE(const Parameter& param_in, UnitCell& unit_in) : MD_base(param_in, unit_in)
+FIRE::FIRE(const Parameter& param_in, MdCell& mdcell_in) : MD_base(param_in, mdcell_in)
 {
     force_thr = param_in.inp.force_thr;
     dt_max = -1.0;
@@ -49,7 +49,7 @@ void FIRE::first_half(std::ofstream& ofs)
     ModuleBase::TITLE("FIRE", "first_half");
     ModuleBase::timer::start("FIRE", "first_half");
 
-    MD_base::update_vel(force);
+    MD_base::update_vel();
 
     check_fire();
 
@@ -66,7 +66,7 @@ void FIRE::second_half(void)
     ModuleBase::TITLE("FIRE", "second_half");
     ModuleBase::timer::start("FIRE", "second_half");
 
-    MD_base::update_vel(force);
+    MD_base::update_vel();
 
     check_force();
 
@@ -166,7 +166,7 @@ void FIRE::check_force(void)
 
     int movable_dof = 0;
 
-    for (int i = 0; i < ucell.nat; ++i)
+    for (const LocalAtom& atom : mdcell.owned_atoms())
     {
         for (int j = 0; j < 3; ++j)
         {
@@ -177,16 +177,16 @@ void FIRE::check_force(void)
             // m 1 1 1 -> x/y/z are included.
             // m 1 0 1 -> y is excluded.
             // m 0 0 0 -> this atom contributes no DOF to convergence.
-            if (!ionmbl[i][j])
+            if (!atom.mbl[j])
             {
                 continue;
             }
 
             ++movable_dof;
 
-            if (max < std::abs(force[i][j]))
+            if (max < std::abs(atom.force[j]))
             {
-                max = std::abs(force[i][j]);
+                max = std::abs(atom.force[j]);
             }
         }
     }
@@ -224,22 +224,22 @@ void FIRE::check_fire(void)
     // Compute P, |F| and |v| only on movable degrees of freedom.
     // Fixed atoms/directions may have non-zero raw forces, but they should not
     // affect the FIRE velocity projection or adaptive time-step control.
-    for (int i = 0; i < ucell.nat; ++i)
+    for (LocalAtom& atom : mdcell.mutable_owned_atoms())
     {
         for (int j = 0; j < 3; ++j)
         {
-            if (!ionmbl[i][j])
+            if (!atom.mbl[j])
             {
                 // Keep frozen components clean.
-                vel[i][j] = 0.0;
+                atom.vel[j] = 0.0;
                 continue;
             }
 
             ++movable_dof;
 
-            P += vel[i][j] * force[i][j];
-            sumforce += force[i][j] * force[i][j];
-            normvel += vel[i][j] * vel[i][j];
+            P += atom.vel[j] * atom.force[j];
+            sumforce += atom.force[j] * atom.force[j];
+            normvel += atom.vel[j] * atom.vel[j];
         }
     }
 
@@ -256,18 +256,18 @@ void FIRE::check_fire(void)
     // Avoid 0/0. In a truly converged case check_force() should stop the run.
     if (sumforce > 0.0 && normvel > 0.0)
     {
-        for (int i = 0; i < ucell.nat; ++i)
+        for (LocalAtom& atom : mdcell.mutable_owned_atoms())
         {
             for (int j = 0; j < 3; ++j)
             {
-                if (!ionmbl[i][j])
+                if (!atom.mbl[j])
                 {
-                    vel[i][j] = 0.0;
+                    atom.vel[j] = 0.0;
                     continue;
                 }
 
-                vel[i][j] = (1.0 - alpha) * vel[i][j]
-                          + alpha * force[i][j] / sumforce * normvel;
+                atom.vel[j] = (1.0 - alpha) * atom.vel[j]
+                            + alpha * atom.force[j] / sumforce * normvel;
             }
         }
     }
@@ -286,11 +286,11 @@ void FIRE::check_fire(void)
         md_dt *= fdec;
         negative_count = 0;
 
-        for (int i = 0; i < ucell.nat; ++i)
+        for (LocalAtom& atom : mdcell.mutable_owned_atoms())
         {
             for (int j = 0; j < 3; ++j)
             {
-                vel[i][j] = 0;
+                atom.vel[j] = 0;
             }
         }
 

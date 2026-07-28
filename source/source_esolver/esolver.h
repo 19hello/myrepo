@@ -37,6 +37,11 @@ class ESolver
     //! such as nscf, get_wf and get_pchg
     virtual void others(BaseCell&, const int) {}
 
+    virtual bool supports_mdcell() const
+    {
+        return false;
+    }
+
     //! calculate total energy of a given system
     virtual double cal_energy() = 0;
 

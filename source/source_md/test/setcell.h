@@ -6,8 +6,11 @@
 
 #include "source_cell/module_neighbor/sltk_atom_arrange.h"
 #include "source_cell/module_neighbor/sltk_grid_driver.h"
+#include "source_cell/md_cell.h"
 #include "source_cell/unitcell.h"
 #include "source_io/module_parameter/parameter.h"
+
+#include <cmath>
 
 Magnetism::Magnetism()
 {
@@ -136,6 +139,26 @@ class Setcell
         input.mdp.md_nraise = 2;
         input.mdp.md_tolerance = 0;
     };
+
+    static MdCell setup_mdcell(UnitCell& ucell, const Parameter& param)
+    {
+        return MdCell(ucell, param);
+    }
+
+    static ModuleBase::Vector3<double> fractional_displacement(const LocalAtom& atom)
+    {
+        const ModuleBase::Vector3<double> initial_frac[] = {
+            ModuleBase::Vector3<double>(0.0, 0.0, 0.0),
+            ModuleBase::Vector3<double>(0.52, 0.52, 0.0),
+            ModuleBase::Vector3<double>(0.51, 0.0, 0.5),
+            ModuleBase::Vector3<double>(0.0, 0.53, 0.5)
+        };
+        ModuleBase::Vector3<double> displacement = atom.frac - initial_frac[atom.type_index];
+        displacement.x -= std::floor(displacement.x + 0.5);
+        displacement.y -= std::floor(displacement.y + 0.5);
+        displacement.z -= std::floor(displacement.z + 0.5);
+        return displacement;
+    }
 };
 
 #endif

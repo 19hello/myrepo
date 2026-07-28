@@ -48,7 +48,8 @@ list(APPEND depend_files
   ../../source_cell/module_neighlist/neighbor_search.cpp
   ../../source_cell/module_neighlist/bin_manager.cpp
   ../../source_cell/module_neighlist/page_allocator.cpp
-  ../../source_cell/module_neighlist/unitcell_lite.cpp
+  ../../source_cell/module_neighlist/domain_decomposition.cpp
+  ../../source_cell/md_cell.cpp
   ../../source_base/output.cpp
   ../../source_io/module_output/output_log.cpp
   ../../source_io/module_output/print_info.cpp

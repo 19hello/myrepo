@@ -7,7 +7,7 @@
 
 #include "atom_spec.h"
 #include "source_cell/unitcell.h"
-
+class MdCell;
 namespace unitcell
 {
     /**
@@ -53,6 +53,11 @@ namespace unitcell
                          const bool& orb = false,
                          const bool& dpks_desc = false,
                          const int& iproc = 0);
+}
+
+namespace mdcell
+{
+    void print_stru_file(const MdCell& mdcell, const std::string& fn);
 }
 
 #endif

@@ -1,13 +1,15 @@
 #include "md_func.h"
 
 #include "source_base/global_variable.h"
+#ifdef __MPI
+#include "source_base/parallel_reduce.h"
+#endif
 #include "source_base/timer.h"
 #include "source_io/module_parameter/parameter.h"
 
 
 namespace MD_func
 {
-
 double gaussrand()
 {
     static double v1=0.0;
@@ -75,6 +77,26 @@ void compute_stress(const UnitCell& unit_in,
     }
 
     return;
+}
+
+void compute_stress(const MdCell& mdcell,
+                    const bool& cal_stress,
+                    const ModuleBase::matrix& virial,
+                    ModuleBase::matrix& stress)
+{
+    if (!cal_stress) return;
+    ModuleBase::matrix t_vector(3, 3);
+    for (std::size_t i = 0; i < mdcell.owned_atoms().size(); ++i)
+    {
+        const LocalAtom& atom = mdcell.owned_atoms()[i];
+        for (int a = 0; a < 3; ++a) for (int b = 0; b < 3; ++b)
+            t_vector(a, b) += atom.mass * atom.vel[a] * atom.vel[b];
+    }
+#ifdef __MPI
+    Parallel_Reduce::reduce_all(t_vector.c, 9);
+#endif
+    for (int i = 0; i < 3; ++i) for (int j = 0; j < 3; ++j)
+        stress(i, j) = virial(i, j) + t_vector(i, j) / mdcell.omega();
 }
 
 void read_vel(const UnitCell& unit_in, ModuleBase::Vector3<double>* vel)
@@ -245,6 +267,71 @@ void init_vel(const UnitCell& unit_in,
     }
 }
 
+void init_vel(MdCell& mdcell,
+              const int& my_rank,
+              const bool& restart,
+              double& temperature,
+              int& frozen_freedom)
+{
+    std::vector<LocalAtom>& atoms = mdcell.mutable_owned_atoms();
+    ModuleBase::Vector3<int> frozen(0, 0, 0);
+    for (std::size_t i = 0; i < atoms.size(); ++i)
+        for (int k = 0; k < 3; ++k) if (!atoms[i].mbl[k]) ++frozen[k];
+#ifdef __MPI
+    if (mdcell.mpi_size() > 1)
+    {
+        Parallel_Reduce::reduce_all(&frozen.x, 3);
+    }
+#endif
+    frozen_freedom = frozen.x + frozen.y + frozen.z;
+    if (!frozen.x) ++frozen_freedom;
+    if (!frozen.y) ++frozen_freedom;
+    if (!frozen.z) ++frozen_freedom;
+    if (mdcell.init_vel())
+    {
+        double kinetic = 0.0;
+        const double current = current_temp(kinetic, mdcell, frozen_freedom);
+        if (!restart && current > 0.0 && temperature > 0.0)
+        {
+            const double factor = sqrt(temperature / current);
+            for (LocalAtom& atom : atoms) atom.vel *= factor;
+        }
+        return;
+    }
+
+    for (int skip = 0; skip < my_rank * 17; ++skip) static_cast<void>(gaussrand());
+    double local_mass = 0.0;
+    ModuleBase::Vector3<double> momentum(0.0, 0.0, 0.0);
+    for (LocalAtom& atom : atoms)
+    {
+        local_mass += atom.mass;
+        for (int k = 0; k < 3; ++k)
+        {
+            atom.vel[k] = atom.mbl[k] ? gaussrand() * sqrt(temperature / atom.mass) : 0.0;
+            if (frozen[k] == 0) momentum[k] += atom.mass * atom.vel[k];
+        }
+    }
+#ifdef __MPI
+    Parallel_Reduce::reduce_all(&local_mass, 1);
+    Parallel_Reduce::reduce_all(&momentum.x, 3);
+#endif
+    for (int k = 0; k < 3; ++k)
+    {
+        if (frozen[k] == 0 && local_mass > 0.0)
+        {
+            for (LocalAtom& atom : atoms) atom.vel[k] -= momentum[k] / local_mass;
+        }
+    }
+    double kinetic = 0.0;
+    const double current = current_temp(kinetic, mdcell, frozen_freedom);
+    if (current > 0.0 && temperature > 0.0)
+    {
+        const double factor = sqrt(temperature / current);
+        for (LocalAtom& atom : atoms) atom.vel *= factor;
+    }
+    static_cast<void>(restart);
+}
+
 void force_virial(ModuleESolver::ESolver* p_esolver,
                   const int& istep,
                   UnitCell& unit_in,
@@ -284,6 +371,37 @@ void force_virial(ModuleESolver::ESolver* p_esolver,
     ModuleBase::timer::end("MD_func", "force_virial");
 
     return;
+}
+
+void force_virial(ModuleESolver::ESolver* p_esolver,
+                  const int& istep,
+                  MdCell& mdcell,
+                  double& potential,
+                  const bool& cal_stress,
+                  ModuleBase::matrix& virial)
+{
+    ModuleBase::TITLE("MD_func", "force_virial");
+    ModuleBase::timer::start("MD_func", "force_virial");
+    if (p_esolver->supports_mdcell())
+    {
+        p_esolver->runner(static_cast<BaseCell&>(mdcell), istep);
+        potential = 0.5 * p_esolver->cal_energy();
+        ModuleBase::matrix local_force;
+        p_esolver->cal_force(static_cast<BaseCell&>(mdcell), local_force);
+        for (LocalAtom& atom : mdcell.mutable_owned_atoms()) atom.force *= 0.5;
+        if (cal_stress) { p_esolver->cal_stress(static_cast<BaseCell&>(mdcell), virial); virial *= 0.5; }
+    }
+    else
+    {
+        if (!mdcell.has_backing_unitcell()) ModuleBase::WARNING_QUIT("MD_func::force_virial", "This ESolver requires UnitCell, but MdCell has no backing UnitCell.");
+        mdcell.sync_backing_unitcell(); UnitCell& ucell = mdcell.backing_unitcell();
+        p_esolver->runner(ucell, istep); potential = 0.5 * p_esolver->cal_energy();
+        ModuleBase::matrix full_force(ucell.nat, 3); p_esolver->cal_force(ucell, full_force); full_force *= 0.5;
+        if (cal_stress) { p_esolver->cal_stress(ucell, virial); virial *= 0.5; }
+        std::vector<int> offsets(ucell.ntype + 1, 0); for (int it=0; it<ucell.ntype; ++it) offsets[it+1]=offsets[it]+ucell.atoms[it].na;
+        for (LocalAtom& atom : mdcell.mutable_owned_atoms()) { const int iat=offsets[atom.type]+atom.type_index; atom.force.set(full_force(iat,0),full_force(iat,1),full_force(iat,2)); }
+    }
+    ModuleBase::timer::end("MD_func", "force_virial");
 }
 
 
@@ -413,6 +531,53 @@ void dump_info(const int& step,
     return;
 }
 
+void dump_info(const int& step,
+               const std::string& global_out_dir,
+               const MdCell& mdcell,
+               const Parameter& param_in,
+               const ModuleBase::matrix& virial)
+{
+    if (param_in.globalv.myrank)
+    {
+        return;
+    }
+
+    std::stringstream file;
+    file << global_out_dir << "MD_dump";
+    std::ofstream ofs(step == 0 ? file.str().c_str() : file.str().c_str(), step == 0 ? std::ios::trunc : std::ios::app);
+
+    const double unit_pos = mdcell.lat0() / ModuleBase::ANGSTROM_AU;
+    const double unit_vel = 1.0 / ModuleBase::ANGSTROM_AU / ModuleBase::AU_to_FS;
+    const double unit_virial = ModuleBase::HARTREE_SI / pow(ModuleBase::BOHR_RADIUS_SI, 3) * 1.0e-8;
+    const double unit_force = ModuleBase::Hartree_to_eV * ModuleBase::ANGSTROM_AU;
+
+    ofs << "MDSTEP:  " << step << std::endl;
+    ofs << std::setprecision(12) << std::setiosflags(std::ios::fixed);
+    ofs << "LATTICE_CONSTANT: " << mdcell.lat0() * ModuleBase::BOHR_TO_A << " Angstrom" << std::endl;
+    ofs << "LATTICE_VECTORS" << std::endl;
+    ofs << "  " << mdcell.latvec().e11 << "  " << mdcell.latvec().e12 << "  " << mdcell.latvec().e13 << std::endl;
+    ofs << "  " << mdcell.latvec().e21 << "  " << mdcell.latvec().e22 << "  " << mdcell.latvec().e23 << std::endl;
+    ofs << "  " << mdcell.latvec().e31 << "  " << mdcell.latvec().e32 << "  " << mdcell.latvec().e33 << std::endl;
+    ofs << "VIRIAL (kbar)" << std::endl;
+    for (int i = 0; i < 3; ++i)
+    {
+        ofs << "  " << virial(i, 0) * unit_virial
+            << "  " << virial(i, 1) * unit_virial
+            << "  " << virial(i, 2) * unit_virial << std::endl;
+    }
+    ofs << "INDEX    LABEL    POSITION (Angstrom)    VELOCITY (Angstrom/fs)    FORCE (eV/Angstrom)" << std::endl;
+    for (int i = 0; i < mdcell.nlocal(); ++i)
+    {
+        const LocalAtom& atom = mdcell.owned_atoms()[static_cast<std::size_t>(i)];
+        ofs << "  " << i
+            << "  " << mdcell.type_labels()[static_cast<std::size_t>(atom.type)]
+            << "  " << atom.cart.x * unit_pos << "  " << atom.cart.y * unit_pos << "  " << atom.cart.z * unit_pos
+            << "  " << atom.vel.x * unit_vel << "  " << atom.vel.y * unit_vel << "  " << atom.vel.z * unit_vel
+            << "  " << atom.force.x * unit_force << "  " << atom.force.y * unit_force << "  " << atom.force.z * unit_force
+            << std::endl;
+    }
+}
+
 void get_mass_mbl(const UnitCell& unit_in,
                   double* allmass,
                   ModuleBase::Vector3<int>& frozen,
@@ -466,6 +631,47 @@ double current_temp(double& kinetic,
         kinetic = kinetic_energy(natom, vel, allmass);
         return 2 * kinetic / (3 * natom - frozen_freedom);
     }
+}
+
+double current_temp(double& kinetic,
+                    const MdCell& mdcell,
+                    const int& frozen_freedom)
+{
+    kinetic = 0.0;
+    for (std::size_t i = 0; i < mdcell.owned_atoms().size(); ++i)
+    {
+        const LocalAtom& atom = mdcell.owned_atoms()[i];
+        kinetic += 0.5 * atom.mass * atom.vel.norm2();
+    }
+#ifdef __MPI
+    Parallel_Reduce::reduce_all(&kinetic, 1);
+#endif
+    if (3 * mdcell.nat() == frozen_freedom) return 0.0;
+    return 2.0 * kinetic / (3 * mdcell.nat() - frozen_freedom);
+}
+
+int global_dof(const MdCell& mdcell, const int& frozen_freedom)
+{
+    static_cast<void>(frozen_freedom);
+    int natom = mdcell.nlocal();
+    int local_frozen[3] = {0, 0, 0};
+    for (int i = 0; i < mdcell.nlocal(); ++i)
+    {
+        const ModuleBase::Vector3<int>& mbl = mdcell.owned_atoms()[static_cast<std::size_t>(i)].mbl;
+        if (mbl.x == 0) ++local_frozen[0];
+        if (mbl.y == 0) ++local_frozen[1];
+        if (mbl.z == 0) ++local_frozen[2];
+    }
+    int global_frozen[3] = {local_frozen[0], local_frozen[1], local_frozen[2]};
+#ifdef __MPI
+    Parallel_Reduce::reduce_all(&natom, 1);
+    Parallel_Reduce::reduce_all(global_frozen, 3);
+#endif
+    int total_frozen = global_frozen[0] + global_frozen[1] + global_frozen[2];
+    if (global_frozen[0] == 0) ++total_frozen;
+    if (global_frozen[1] == 0) ++total_frozen;
+    if (global_frozen[2] == 0) ++total_frozen;
+    return 3 * natom - total_frozen;
 }
 
 void temp_vector(const int& natom,

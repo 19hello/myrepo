@@ -1,6 +1,7 @@
 #ifndef MD_FUNC_H
 #define MD_FUNC_H
 
+#include "source_cell/md_cell.h"
 #include "source_esolver/esolver.h"
 
 class Parameter;
@@ -44,6 +45,11 @@ void init_vel(const UnitCell& unit_in,
               int& frozen_freedom,
               ModuleBase::Vector3<int>* ionmbl,
               ModuleBase::Vector3<double>* vel);
+void init_vel(MdCell& mdcell,
+              const int& my_rank,
+              const bool& restart,
+              double& temperature,
+              int& frozen_freedom);
 
 /**
  * @brief read in atomic velocities from STRU
@@ -107,6 +113,12 @@ void force_virial(ModuleESolver::ESolver* p_esolver,
                   ModuleBase::Vector3<double>* force,
                   const bool& cal_stress,
                   ModuleBase::matrix& virial);
+void force_virial(ModuleESolver::ESolver* p_esolver,
+                  const int& istep,
+                  MdCell& mdcell,
+                  double& potential,
+                  const bool& cal_stress,
+                  ModuleBase::matrix& virial);
 /**
  * @brief calculate the ionic kinetic energy
  *
@@ -130,6 +142,10 @@ double kinetic_energy(const int& natom, const ModuleBase::Vector3<double>* vel, 
 void compute_stress(const UnitCell& unit_in,
                     const ModuleBase::Vector3<double>* vel,
                     const double* allmass,
+                    const bool& cal_stress,
+                    const ModuleBase::matrix& virial,
+                    ModuleBase::matrix& stress);
+void compute_stress(const MdCell& mdcell,
                     const bool& cal_stress,
                     const ModuleBase::matrix& virial,
                     ModuleBase::matrix& stress);
@@ -164,6 +180,11 @@ void dump_info(const int& step,
                const ModuleBase::matrix& virial,
                const ModuleBase::Vector3<double>* force,
                const ModuleBase::Vector3<double>* vel);
+void dump_info(const int& step,
+               const std::string& global_out_dir,
+               const MdCell& mdcell,
+               const Parameter& param_in,
+               const ModuleBase::matrix& virial);
 
 /**
  * @brief obtain the atomic mass and whether the freedom is fixed
@@ -204,6 +225,10 @@ double current_temp(double& kinetic,
                     const int& frozen_freedom,
                     const double* allmass,
                     const ModuleBase::Vector3<double>* vel);
+double current_temp(double& kinetic,
+                    const MdCell& mdcell,
+                    const int& frozen_freedom);
+int global_dof(const MdCell& mdcell, const int& frozen_freedom);
 
 /**
  * @brief get the temperature vectors
