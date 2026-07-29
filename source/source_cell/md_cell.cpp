@@ -177,6 +177,16 @@ void MdCell::initialize_from_owned_atoms_(MPI_Comm comm, double cutoff, double s
 
 #endif
 
+#ifndef __MPI
+void MdCell::initialize_from_owned_atoms_(double cutoff, double skin)
+{
+    cutoff_ = cutoff;
+    skin_ = skin;
+    clear_forces_(owned_atoms_);
+    exchange_ghost_atoms();
+}
+#endif
+
 MdCell::MdCell(UnitCell& ucell, const Parameter& param)
 {
     const double cutoff = infer_cutoff_from_parameter_(param);
@@ -187,12 +197,6 @@ MdCell::MdCell(UnitCell& ucell, const Parameter& param)
 #endif
 }
 
-#ifdef __MPI
-MdCell::MdCell(UnitCell& ucell, MPI_Comm comm, double cutoff, double skin)
-{
-    initialize_from_ucell_(ucell, comm, cutoff, skin);
-}
-
 MdCell::MdCell(const ModuleBase::Matrix3& latvec,
                const ModuleBase::Matrix3& gt,
                double lat0,
@@ -201,7 +205,6 @@ MdCell::MdCell(const ModuleBase::Matrix3& latvec,
                const std::vector<LocalAtom>& owned_atoms,
                const std::vector<std::string>& type_labels,
                const std::vector<double>& type_masses,
-               MPI_Comm comm,
                double cutoff,
                double skin)
 {
@@ -214,7 +217,17 @@ MdCell::MdCell(const ModuleBase::Matrix3& latvec,
     type_labels_ = type_labels;
     type_masses_ = type_masses;
     init_vel_ = true;
-    initialize_from_owned_atoms_(comm, cutoff, skin);
+#ifdef __MPI
+    initialize_from_owned_atoms_(MPI_COMM_WORLD, cutoff, skin);
+#else
+    initialize_from_owned_atoms_(cutoff, skin);
+#endif
+}
+
+#ifdef __MPI
+MdCell::MdCell(UnitCell& ucell, MPI_Comm comm, double cutoff, double skin)
+{
+    initialize_from_ucell_(ucell, comm, cutoff, skin);
 }
 
 int MdCell::mpi_rank() const

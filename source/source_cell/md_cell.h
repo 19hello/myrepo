@@ -35,9 +35,6 @@ class MdCell : public BaseCell
 {
 public:
     MdCell(UnitCell& ucell, const Parameter& param);
-
-#ifdef __MPI
-    MdCell(UnitCell& ucell, MPI_Comm comm, double cutoff, double skin = 0.0);
     MdCell(const ModuleBase::Matrix3& latvec,
            const ModuleBase::Matrix3& gt,
            double lat0,
@@ -46,9 +43,11 @@ public:
            const std::vector<LocalAtom>& owned_atoms,
            const std::vector<std::string>& type_labels,
            const std::vector<double>& type_masses,
-           MPI_Comm comm,
            double cutoff,
-           double skin = 0.0);
+           double skin);
+
+#ifdef __MPI
+    MdCell(UnitCell& ucell, MPI_Comm comm, double cutoff, double skin = 0.0);
 
     int mpi_rank() const;
     int mpi_size() const;
@@ -101,6 +100,8 @@ private:
     static double wrap_fractional_(double value);
 #ifdef __MPI
     void initialize_from_owned_atoms_(MPI_Comm comm, double cutoff, double skin);
+#else
+    void initialize_from_owned_atoms_(double cutoff, double skin);
 #endif
 
     int nat_ = 0;

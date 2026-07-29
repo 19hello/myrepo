@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "source_cell/distributed_mdcell_reader.h"
+#include "source_cell/md_cell.h"
 #include "source_base/constants.h"
 #include "source_base/global_variable.h"
 #include "source_cell/module_neighlist/domain_decomposition.h"
@@ -63,7 +64,6 @@ TEST(DistributedMdCellReaderTest, ReadOwnedAtomsFromSTRUWithoutUnitCell)
     MPI_Barrier(MPI_COMM_WORLD);
 
     MdCell mdcell = DistributedMdCellReader::read_lj_stru(stru_file,
-                                                          MPI_COMM_WORLD,
                                                           1.0 * ModuleBase::ANGSTROM_AU,
                                                           0.0);
 
