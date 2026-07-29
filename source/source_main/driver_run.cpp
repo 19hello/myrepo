@@ -53,55 +53,80 @@ void Driver::driver_run()
 
     const std::string cal = PARAM.inp.calculation;
 
-    // the life of ucell should begin here, mohan 2024-05-12
-    UnitCell ucell;
-    ucell.setup(PARAM.inp.latname, PARAM.inp.ntype, PARAM.inp.lmaxmax, PARAM.inp.init_vel, PARAM.inp.fixed_axes);
-
-    ucell.setup_cell(PARAM.globalv.global_in_stru,
-                     GlobalV::ofs_running,
-                     PARAM.inp.symmetry_prec,
-                     PARAM.inp.dfthalf_type,
-                     PARAM.inp.pseudo_dir,
-                     PARAM.inp.nspin,
-                     PARAM.inp.basis_type,
-                     PARAM.inp.orbital_dir,
-                     PARAM.inp.init_wfc,
-                     PARAM.inp.onsite_radius,
-                     PARAM.globalv.deepks_setorb,
-                     PARAM.inp.rpa,
-                     PARAM.inp.fixed_atoms,
-                     PARAM.inp.noncolin,
-                     PARAM.inp.calculation,
-                     PARAM.inp.esolver_type);
-    unitcell::check_atomic_stru(ucell, PARAM.inp.min_dist_coef);
-
-    //! 2: initialize the ESolver (depends on a set-up ucell after `setup_cell`)
     this->init_hardware();
-
     ModuleESolver::ESolver* p_esolver = ModuleESolver::init_esolver(PARAM.inp);
 
-    // this Json part should be moved to before_all_runners, mohan 2024-05-12
-#ifdef __RAPIDJSON
-    Json::gen_stru_wrapper(&ucell);
-#endif
-
-    //! 4: different types of calculations
-    if (cal == "md" && PARAM.inp.esolver_type == "lj")
+    // UnitCell is initialized only for workflows that require its full DFT state.
+    UnitCell ucell;
+    bool ucell_initialized = false;
+    const auto initialize_ucell = [&]()
     {
-        MdCell mdcell(ucell, PARAM);
-        p_esolver->before_all_runners(mdcell, PARAM.inp);
-        Run_MD::md_line(mdcell, p_esolver, PARAM);
-        p_esolver->after_all_runners(mdcell);
+        if (ucell_initialized)
+        {
+            return;
+        }
+
+        ucell.setup(PARAM.inp.latname,
+                    PARAM.inp.ntype,
+                    PARAM.inp.lmaxmax,
+                    PARAM.inp.init_vel,
+                    PARAM.inp.fixed_axes);
+        ucell.setup_cell(PARAM.globalv.global_in_stru,
+                         GlobalV::ofs_running,
+                         PARAM.inp.symmetry_prec,
+                         PARAM.inp.dfthalf_type,
+                         PARAM.inp.pseudo_dir,
+                         PARAM.inp.nspin,
+                         PARAM.inp.basis_type,
+                         PARAM.inp.orbital_dir,
+                         PARAM.inp.init_wfc,
+                         PARAM.inp.onsite_radius,
+                         PARAM.globalv.deepks_setorb,
+                         PARAM.inp.rpa,
+                         PARAM.inp.fixed_atoms,
+                         PARAM.inp.noncolin,
+                         PARAM.inp.calculation,
+                         PARAM.inp.esolver_type);
+        unitcell::check_atomic_stru(ucell, PARAM.inp.min_dist_coef);
+        ucell_initialized = true;
+
+#ifdef __RAPIDJSON
+        Json::gen_stru_wrapper(&ucell);
+#endif
+    };
+
+    if (cal == "md")
+    {
+        if (p_esolver->supports_mdcell())
+        {
+            double cutoff_bohr = 0.0;
+            for (std::size_t i = 0; i < PARAM.inp.mdp.lj_rcut.size(); ++i)
+            {
+                cutoff_bohr = std::max(cutoff_bohr, PARAM.inp.mdp.lj_rcut[i] * ModuleBase::ANGSTROM_AU);
+            }
+            MdCell mdcell = DistributedMdCellReader::read_lj_stru(
+                PARAM.globalv.global_in_stru, cutoff_bohr, 0.0);
+            GlobalV::ofs_running << std::endl;
+            ModuleBase::GlobalFunc::OUT(GlobalV::ofs_running, "TOTAL ATOM NUMBER", mdcell.nat());
+            GlobalV::ofs_running << std::endl;
+            p_esolver->before_all_runners(mdcell, PARAM.inp);
+            Run_MD::md_line(mdcell, p_esolver, PARAM);
+            p_esolver->after_all_runners(mdcell);
+        }
+        else
+        {
+            initialize_ucell();
+            MdCell mdcell(ucell, PARAM);
+            p_esolver->before_all_runners(ucell, PARAM.inp);
+            Run_MD::md_line(mdcell, p_esolver, PARAM);
+            p_esolver->after_all_runners(ucell);
+        }
     }
     else
     {
+        initialize_ucell();
         p_esolver->before_all_runners(ucell, PARAM.inp);
-        if (cal == "md")
-        {
-            MdCell mdcell(ucell, PARAM);
-            Run_MD::md_line(mdcell, p_esolver, PARAM);
-        }
-        else if (cal == "scf" || cal == "relax" || cal == "cell-relax" || cal == "nscf")
+        if (cal == "scf" || cal == "relax" || cal == "cell-relax" || cal == "nscf")
         {
             Relax_Driver rl_driver;
             rl_driver.relax_driver(p_esolver, ucell, PARAM.inp, GlobalV::ofs_running);
@@ -127,7 +152,10 @@ void Driver::driver_run()
     this->finalize_hardware();
 
     //! 6: output the json file
-    Json::create_Json(&ucell, PARAM);
+    if (ucell_initialized)
+    {
+        Json::create_Json(&ucell, PARAM);
+    }
 
     return;
 }

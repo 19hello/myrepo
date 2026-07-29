@@ -333,6 +333,7 @@ void MdCell::migrate_owned_atoms()
         atom.cart = atom.frac * latvec_;
     }
     sync_backing_unitcell_owned_atoms_();
+    exchange_ghost_atoms();
 }
 
 void MdCell::set_lattice_vectors(const ModuleBase::Matrix3& latvec)

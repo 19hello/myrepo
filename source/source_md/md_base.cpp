@@ -106,9 +106,7 @@ void MD_base::update_pos()
         atom.cart = atom.frac * mdcell.latvec();
     }
 
-#ifdef __MPI
     mdcell.migrate_owned_atoms();
-#endif
 
     return;
 }
