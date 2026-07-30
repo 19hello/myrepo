@@ -520,32 +520,32 @@ void MdCell::sync_backing_unitcell()
     sync_backing_unitcell_owned_atoms_();
 }
 
-BaseCell::Kind MdCell::do_kind() const
+BaseCell::Kind MdCell::get_kind() const
 {
     return Kind::md_cell;
 }
 
-int MdCell::do_nat() const
+int MdCell::get_nat() const
 {
     return nat_;
 }
 
-double MdCell::do_lat0() const
+double MdCell::get_lat0() const
 {
     return lat0_;
 }
 
-double MdCell::do_omega() const
+double MdCell::get_omega() const
 {
     return omega_;
 }
 
-const ModuleBase::Matrix3& MdCell::do_latvec() const
+const ModuleBase::Matrix3& MdCell::get_latvec() const
 {
     return latvec_;
 }
 
-const ModuleBase::Matrix3& MdCell::do_GT() const
+const ModuleBase::Matrix3& MdCell::get_GT() const
 {
     return gt_;
 }

@@ -82,12 +82,12 @@ public:
     void sync_backing_unitcell();
 
 private:
-    Kind do_kind() const override;
-    int do_nat() const override;
-    double do_lat0() const override;
-    double do_omega() const override;
-    const ModuleBase::Matrix3& do_latvec() const override;
-    const ModuleBase::Matrix3& do_GT() const override;
+    Kind get_kind() const override;
+    int get_nat() const override;
+    double get_lat0() const override;
+    double get_omega() const override;
+    const ModuleBase::Matrix3& get_latvec() const override;
+    const ModuleBase::Matrix3& get_GT() const override;
 
     static double infer_cutoff_from_parameter_(const Parameter& param);
 #ifdef __MPI
