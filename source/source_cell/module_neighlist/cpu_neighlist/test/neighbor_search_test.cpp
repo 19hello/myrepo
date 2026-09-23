@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "source_cell/module_neighlist/local_atom.h"
-#include "source_cell/module_neighlist/neighbor_search.h"
+#include "source_cell/module_neighlist/cpu_neighlist/local_atom.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_search.h"
 #include "source_cell/unitcell.h"
 
 #include <cstddef>

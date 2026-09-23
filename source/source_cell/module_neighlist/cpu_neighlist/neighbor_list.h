@@ -1,7 +1,7 @@
 #ifndef NEIGHBOR_LIST_H
 #define NEIGHBOR_LIST_H
 
-#include "source_cell/module_neighlist/neighbor_types.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_types.h"
 
 #include <vector>
 #include "page_allocator.h"

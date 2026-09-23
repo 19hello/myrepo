@@ -1,7 +1,7 @@
 #ifndef LOCAL_ATOM_H
 #define LOCAL_ATOM_H
 
-#include "source_cell/module_neighlist/neighbor_types.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_types.h"
 #include "source_base/vector3.h"
 
 #include <cstdint>

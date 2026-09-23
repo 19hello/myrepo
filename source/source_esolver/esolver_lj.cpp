@@ -2,8 +2,8 @@
 
 #include "source_base/global_variable.h"
 #include "source_cell/mdcell.h"
-#include "source_cell/module_neighlist/neighbor_search.h"
-#include "source_cell/module_neighlist/neighbor_types.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_search.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_types.h"
 #include "source_io/module_parameter/parameter.h"
 #include "source_cell/cif_io.h"
 #include "source_io/module_output/output_log.h"

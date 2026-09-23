@@ -1,0 +1,6 @@
+# NEP GPU validation case
+
+This case uses a silicon NEP4 potential without ZBL. It is reserved for
+comparing the ABACUS NEP_CPU and NEP_GPU backends on the same MD system.
+The original HfO2 NEP case remains `101_NEP_HfO2` and is used for the CPU
+production-model baseline because its potential includes ZBL.

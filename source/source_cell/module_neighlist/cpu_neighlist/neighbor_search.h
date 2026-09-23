@@ -1,10 +1,10 @@
 #ifndef NEIGHBOR_SEARCH_H
 #define NEIGHBOR_SEARCH_H
 
-#include "source_cell/module_neighlist/neighbor_atom.h"
-#include "source_cell/module_neighlist/bin_manager.h"
-#include "source_cell/module_neighlist/neighbor_list.h"
-#include "source_cell/module_neighlist/local_atom.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_atom.h"
+#include "source_cell/module_neighlist/cpu_neighlist/bin_manager.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_list.h"
+#include "source_cell/module_neighlist/cpu_neighlist/local_atom.h"
 #include "source_cell/basecell.h"
 
 class MDCell;
@@ -73,6 +73,9 @@ public:
      * @return Const reference to the NeighborList object.
      */
     const NeighborList& get_neighbor_list() const;
+
+    /// Get a neighbor list whose centers include owned and ghost atoms.
+    const NeighborList& get_all_neighbor_list() const;
 
     /**
      * @brief Get the search radius.
@@ -145,11 +148,18 @@ private:
     /// The constructed neighbor list
     NeighborList neighbor_list_;
     NeighborList candidate_neighbor_list_;
+    NeighborList all_neighbor_list_;
+    NeighborList candidate_all_neighbor_list_;
 
     /// Bin manager for efficient neighbor search
     BinManager bin_manager_;
 
     void filter_candidate_neighbors_(double cutoff, double lat0);
+    void filter_candidate_neighbors_(double cutoff,
+                                     double lat0,
+                                     const NeighborList& candidate_list,
+                                     NeighborList& neighbor_list,
+                                     const std::vector<NeighborAtom>& centers);
 
     // ========== Compile-time constants ==========
 

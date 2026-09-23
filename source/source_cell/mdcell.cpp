@@ -2,7 +2,7 @@
 
 #include "source_base/parallel_cell.h"
 #include "source_cell/unitcell.h"
-#include "source_cell/module_neighlist/neighbor_search.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_search.h"
 
 #include <algorithm>
 #include <cmath>

@@ -1,7 +1,7 @@
 #ifndef NEIGHBOR_ATOM_H
 #define NEIGHBOR_ATOM_H
 
-#include "source_cell/module_neighlist/neighbor_types.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_types.h"
 
 #include <vector>
 

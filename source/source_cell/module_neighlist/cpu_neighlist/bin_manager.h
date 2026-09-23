@@ -2,9 +2,9 @@
 #define BIN_MANAGER_H
 
 #include <vector>
-#include "source_cell/module_neighlist/neighbor_atom.h"
-#include "source_cell/module_neighlist/neighbor_list.h"
-#include "source_cell/module_neighlist/neighbor_types.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_atom.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_list.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_types.h"
 
 /**
  * @brief A single bin in the 3D binning grid for neighbor search.

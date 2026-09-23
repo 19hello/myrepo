@@ -3,7 +3,7 @@
 
 #include "source_cell/basecell.h"
 #include "source_cell/strumeta.h"
-#include "source_cell/module_neighlist/local_atom.h"
+#include "source_cell/module_neighlist/cpu_neighlist/local_atom.h"
 #include "source_base/matrix3.h"
 
 #ifdef __MPI

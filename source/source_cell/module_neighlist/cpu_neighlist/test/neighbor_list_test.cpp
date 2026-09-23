@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "source_cell/module_neighlist/neighbor_list.h"
+#include "source_cell/module_neighlist/cpu_neighlist/neighbor_list.h"
 
 TEST(PageAllocator_Initialize, DefaultAndCustom)
 {

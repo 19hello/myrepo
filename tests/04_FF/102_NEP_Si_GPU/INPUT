@@ -1,0 +1,19 @@
+INPUT_PARAMETERS
+suffix            nep_si_gpu
+calculation       md
+device            gpu
+pseudo_dir        ../../PP_ORB
+
+esolver_type      nep
+pot_file          ../../PP_ORB/nep_si_2022_4body.txt
+
+cal_force         1
+cal_stress        1
+
+md_nstep          20
+md_type           nve
+md_dt             1
+md_dumpfreq       0
+md_restartfreq    0
+md_seed           1
+init_vel          1

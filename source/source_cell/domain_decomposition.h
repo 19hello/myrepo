@@ -3,7 +3,7 @@
 
 #include "source_base/matrix3.h"
 #include "source_base/vector3.h"
-#include "source_cell/module_neighlist/local_atom.h"
+#include "source_cell/module_neighlist/cpu_neighlist/local_atom.h"
 
 #include <array>
 #include <cstdint>
@@ -30,6 +30,12 @@ class CommunicationDomain;
 class DomainDecomposition
 {
 public:
+    enum class NeighborListMode
+    {
+        cpu,
+        gpu
+    };
+
     DomainDecomposition();
     ~DomainDecomposition();
     DomainDecomposition(const DomainDecomposition&) = delete;
@@ -46,6 +52,7 @@ public:
     void exchange_ghost_atoms(MDCell& cell);
     void update_ghost_atom_positions(MDCell& cell);
     void accumulate_ghost_forces(MDCell& cell);
+    void set_neighbor_list_mode(NeighborListMode mode);
     void prepare_neighbors(MDCell& cell);
 
     int owner_rank_from_frac(const ModuleBase::Vector3<double>& frac) const;
@@ -131,6 +138,7 @@ private:
     double lat0_;
     double cutoff_;
     double skin_;
+    NeighborListMode neighbor_list_mode_ = NeighborListMode::cpu;
     std::vector<GhostExchangeSlot> ghost_slots_;
     bool ghost_layout_valid_ = false;
 };
